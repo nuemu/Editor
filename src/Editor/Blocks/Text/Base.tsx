@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal } from 'solid-js';
-import { lexer } from '../../../Components/lexer';
+import { parser } from '../../../Components/lexer';
 
 const style = {
   outline: 'none',
@@ -12,7 +12,7 @@ const TextBase: Component = () => {
 
   const handleInput = (e: InputEvent) => {
     var element =  e.target as HTMLElement
-    lexer(element.innerText)
+    parser(element.innerText)
     setText(element.innerText)
   }
 
