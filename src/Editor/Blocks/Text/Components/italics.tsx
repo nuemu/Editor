@@ -2,15 +2,15 @@ import { Component } from 'solid-js';
 
 const style: any = {
   outline: 'none',
-  'font-weight': 'bolder'
+  'font-style': 'italic'
 }
 
-const Bold: Component = (props: any) => {
+const Italics: Component = (props: any) => {
   const {ref, index, block} = props
 
   return (
     <span
-      class="bold"
+      class="italics"
       ref={ref}
       style={style}
       innerHTML={block[index].content}
@@ -18,4 +18,4 @@ const Bold: Component = (props: any) => {
   )
 }
 
-export default Bold
+export default Italics

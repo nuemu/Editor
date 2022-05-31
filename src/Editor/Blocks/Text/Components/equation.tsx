@@ -7,16 +7,15 @@ const Equation: Component = (props: any) => {
   const [equation, setEquation] = createSignal(block[index].content)
   const [display, setDisplay] = createSignal('none')
 
-  let inputArea: HTMLSpanElement
+  let inputArea: HTMLSpanElement|undefined = undefined;
 
   createEffect(() => {
     display()
-    inputArea.focus()
+    inputArea!.focus()
   })
 
   const equationBlock:any = {
     position: 'relative',
-    display: 'inline-block'
   }
 
   const equationInputStyle:any = () => {return{
@@ -36,11 +35,13 @@ const Equation: Component = (props: any) => {
   const handleInput = (e: InputEvent) => {
     const element = e.target as HTMLElement
     setEquation(element.innerText)
+
+    if(element.innerText === '') forceFocus(index, -1)
   }
 
   const handleFocus = () => {
     setFocus(index)
-    setDisplay('block')
+    setDisplay('inline')
   }
 
   const handleBlur = (e: FocusEvent) => {
@@ -52,34 +53,14 @@ const Equation: Component = (props: any) => {
     }
   }
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    const range = window.getSelection()?.getRangeAt(0)
-    const length = range!.endContainer.nodeValue!.length
-    const carretPos = range?.endOffset
-
-    if(e.key === 'ArrowRight'){
-      if(length === carretPos && block.length-1 > index){
-        forceFocus(index+1)
-      }
-    }
-
-    if(e.key === 'ArrowLeft'){
-      if(carretPos === 0 && index !== 0){
-        forceFocus(index-1)
-      }
-    }
-
-    if(e.key === 'Enter'){
-      inputArea.blur()
-    }
-  }
-
   return (
     <span
+      class="equation"
       ref={ref}
       style={equationBlock}
       tabIndex={0}
       onFocus={() => handleFocus()}
+      contentEditable={false}
     >
       <span
         innerHTML={katexRender()}
@@ -91,7 +72,6 @@ const Equation: Component = (props: any) => {
         innerText={block[index].content}
         onInput={(e: InputEvent) => handleInput(e)}
         onBlur={(e) => {setDisplay('none'); handleBlur(e)}}
-        onKeyDown={(e) => handleKeyDown(e)}
       />
     </span>
   )
