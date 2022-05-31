@@ -1,25 +1,22 @@
 import { Component, createSignal, untrack } from 'solid-js';
+import katex from 'katex'
+import 'katex/dist/katex.min.css';
 
 const style = {
   outline: 'none',
 }
 
 const Equation: Component = () => {
-  var [text, setText] = createSignal("sample")
-
-  const handleInput = (e: InputEvent) => {
-    var element =  e.target as HTMLElement
-    setText(element.innerText)
+  const katexRender = () => {
+    return katex.renderToString("c = \\pm\\sqrt{a^2 + b^2}", {
+      throwOnError: false
+    });
   }
 
   return (
-    <div
-      contentEditable={true}
-      style={style}
-      onInput={(e) => {handleInput(e)}}
-    >
-      {<div>{text}</div>}
-    </div>
+    <span
+      innerHTML={katexRender()}
+    />
   )
 }
 

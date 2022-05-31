@@ -1,28 +1,26 @@
 import { Component, createEffect, createSignal } from 'solid-js';
-import { parser } from '../../../Components/lexer';
+import { Dynamic } from "solid-js/web"
+import { inline_parser } from '../../../Components/lexer';
+
+const components = import.meta.globEager('./Components/*.tsx')
 
 const style = {
   outline: 'none',
 }
 
 const TextBase: Component = () => {
-  var [text, setText] = createSignal("sample")
-
-  const textRef = JSON.parse(JSON.stringify(text()))
-
-  const handleInput = (e: InputEvent) => {
-    var element =  e.target as HTMLElement
-    parser(element.innerText)
-    setText(element.innerText)
-  }
+  var [block, setBlock] = createSignal([
+    {type: 'plain', text: 'sample'},
+    {type: 'equation', text: 'sample'}
+  ])
 
   return (
     <div
-      contentEditable={true}
       style={style}
-      onInput={(e) => {handleInput(e)}}
     >
-      {<div>{textRef}</div>}
+      {block().map((data: {type:string, text:string}) => (
+        <Dynamic component={components['./Components/'+data.type+'.tsx'].default} />
+      ))}
     </div>
   )
 }

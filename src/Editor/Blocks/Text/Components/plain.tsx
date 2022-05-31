@@ -4,22 +4,19 @@ const style = {
   outline: 'none',
 }
 
-const Plain: Component = () => {
-  var [text, setText] = createSignal("sample")
-
+const Plain: Component = (props) => {
   const handleInput = (e: InputEvent) => {
     var element =  e.target as HTMLElement
-    setText(element.innerText)
   }
 
   return (
-    <div
+    <span
       contentEditable={true}
       style={style}
       onInput={(e) => {handleInput(e)}}
     >
-      {<div>{text}</div>}
-    </div>
+      {<span>aaaa</span>}
+    </span>
   )
 }
 

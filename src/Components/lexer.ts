@@ -70,9 +70,18 @@ export const head_lexer = (sentence: string) => {
   return splited
 }
 
-export const parser = (sentence: string) => {
+export const inline_parser = (sentence: string) => {
   var split_sentence: {type: string, content: string}[] = inline_lexer(sentence)
+  var parsed: {type: string, content:string}[] = []
+  var current_type = 'plain'
+  var current_content = ''
   split_sentence.forEach(content => {
-    console.log(content.type)
+    current_content += content.content
+    if(content.type !== 'plain'){
+      if(current_type === 'plain') {parsed.push({type: 'plain', content: current_content});current_type = content.type; current_content = ''}
+      else if(current_type === content.type) {parsed.push({type: current_type, content: current_content});current_type = 'plain'; current_content = ''}
+    }
   })
+  parsed.push({type: 'plain', content: current_content});
+  console.log(parsed)
 }
