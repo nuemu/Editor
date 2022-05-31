@@ -6,7 +6,7 @@ const style = {
   outline: 'none',
 }
 
-const Plain: Component = (props: any) => {
+const Bold: Component = (props: any) => {
   const {ref, setFocus, forceFocus, index, block, setBlock} = props
   const handleInput = (e: InputEvent) => {
     var element =  e.target as HTMLElement
@@ -19,6 +19,16 @@ const Plain: Component = (props: any) => {
       }
     })
   }
+  
+  const handleBlur = (e: FocusEvent) => {
+    var element =  e.target as HTMLElement
+    const newBlock = JSON.parse(JSON.stringify(block))
+    if(element.innerText === ''){
+      newBlock.splice(index, 1)
+      setBlock('data', () => newBlock)
+    }
+  }
+
   const handleKeyDown = (e: KeyboardEvent) => {
     const range = window.getSelection()?.getRangeAt(0)
     const length = range!.endContainer.nodeValue!.length
@@ -42,13 +52,14 @@ const Plain: Component = (props: any) => {
       ref={ref}
       contentEditable={true}
       style={style}
-      onInput={(e) => handleInput(e)}
-      innerHTML={'<span>'+block[index].content+'</span>'}
+      onInput={(e) => {handleInput(e)}}
+      innerHTML={'<span><strong>'+block[index].content+'</strong></span>'}
       tabIndex={0}
-      onFocus={() => setFocus(index)}
+      onFocus={() => {setFocus(index)}}
+      onBlur={(e: FocusEvent) => {handleBlur(e)}}
       onKeyDown={(e) => handleKeyDown(e)}
     />
   )
 }
 
-export default Plain
+export default Bold
