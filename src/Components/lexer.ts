@@ -83,5 +83,5 @@ export const inline_parser = (sentence: string) => {
     }
   })
   parsed.push({type: 'plain', content: current_content});
-  console.log(parsed)
+  return parsed
 }
