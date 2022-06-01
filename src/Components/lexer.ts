@@ -73,6 +73,7 @@ export const Lexer = (parent: Branch) => {
   parent.children = children
 
   if(children.length !== 1 || (children.length == 1 && children[0].type !== 'text')){
+    parent.content = ''
     parent.children.forEach(child => {
       Lexer(child)
     })

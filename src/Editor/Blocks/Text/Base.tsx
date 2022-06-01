@@ -1,6 +1,8 @@
-import { Component, createSignal, createMemo } from 'solid-js';
+import { Component, createSignal, createMemo, onMount } from 'solid-js';
 import { Dynamic } from "solid-js/web"
 import { additionalLexer, Lexer, reverseLexer } from '../../../Components/Lexer';
+
+import { getBlock } from '../../../Store/Blocks'
 
 const components = import.meta.globEager('./Components/*.tsx')
 
@@ -20,7 +22,16 @@ const countBranches = (branch: any) => {
 }
 
 const TextBase: Component = () => {
-  const [text, setText] = createSignal('PLAIN**~~BOLD~~**$c=\\pm\\sqrt{a^2+b^2}$~~Sam**ple**~~')
+  const block = {data: 'loading...'}
+
+  onMount(() => {
+    (async () =>  {
+      const block = await getBlock("01G4FQHW27SQ4AYTNTQV1E7PND")
+      setText(block.data)
+    })()
+  })
+
+  const [text, setText] = createSignal(block!.data)
   const tree = createMemo(() => Lexer({type: 'root', content: text(), children: []}))
 
   var baseRef: HTMLDivElement|undefined = undefined
