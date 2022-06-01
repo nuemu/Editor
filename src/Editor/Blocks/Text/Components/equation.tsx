@@ -3,8 +3,8 @@ import katex from 'katex'
 import 'katex/dist/katex.min.css';
 
 const Equation: Component = (props: any) => {
-  const {ref, setFocus, forceFocus, index, block, setBlock} = props
-  const [equation, setEquation] = createSignal(block[index].content)
+  const {branch} = props
+  const [equation, setEquation] = createSignal(branch.content)
   const [display, setDisplay] = createSignal('none')
 
   let inputArea: HTMLSpanElement|undefined = undefined;
@@ -35,28 +35,15 @@ const Equation: Component = (props: any) => {
   const handleInput = (e: InputEvent) => {
     const element = e.target as HTMLElement
     setEquation(element.innerText)
-
-    if(element.innerText === '') forceFocus(index, -1)
   }
 
   const handleFocus = () => {
-    setFocus(index)
     setDisplay('inline')
-  }
-
-  const handleBlur = (e: FocusEvent) => {
-    var element =  e.target as HTMLElement
-    const newBlock = JSON.parse(JSON.stringify(block))
-    if(element.innerText === ''){
-      newBlock.splice(index, 1)
-      setBlock('data', () => newBlock)
-    }
   }
 
   return (
     <span
       class="equation"
-      ref={ref}
       style={equationBlock}
       tabIndex={0}
       onFocus={() => handleFocus()}
@@ -69,9 +56,9 @@ const Equation: Component = (props: any) => {
         ref={inputArea}
         contentEditable={true}
         style={equationInputStyle()}
-        innerText={block[index].content}
+        innerText={branch.content}
         onInput={(e: InputEvent) => handleInput(e)}
-        onBlur={(e) => {setDisplay('none'); handleBlur(e)}}
+        onBlur={(e) => {setDisplay('none')}}
       />
     </span>
   )

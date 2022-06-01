@@ -1,7 +1,6 @@
-import { Component, createEffect, createSignal, untrack } from 'solid-js';
-import { createStore } from "solid-js/store";
+import { Component, createSignal, createMemo } from 'solid-js';
 import { Dynamic } from "solid-js/web"
-import { inline_parser } from '../../../Components/lexer';
+import { additionalLexer, Lexer, reverseLexer } from '../../../Components/Lexer';
 
 const components = import.meta.globEager('./Components/*.tsx')
 
@@ -11,60 +10,27 @@ const style: any = {
   zIndex: '1',
 }
 
-const TextBase: Component = () => {
-  var [block, setBlock] = createStore({data: [
-    {type: 'plain', content: 'PLAIN '},
-    {type: 'bold', content: 'BOLD '},
-    {type: 'equation', content: 'c=\\pm\\sqrt{a^2+b^2}'},
-  ]})
+const countBranches = (branch: any) => {
+  var sum = 0;
+  branch.children.forEach((child: any) => {
+    if(child.children.length === 0) sum += 1
+    else sum += countBranches(child)
+  })
+  return sum
+}
 
-  var [focus, setFocus] = createSignal(-1)
+const TextBase: Component = () => {
+  const [text, setText] = createSignal('PLAIN**~~BOLD~~**$c=\\pm\\sqrt{a^2+b^2}$~~Sam**ple**~~')
+  const tree = createMemo(() => Lexer({type: 'root', content: text(), children: []}))
 
   var baseRef: HTMLDivElement|undefined = undefined
-  let refs: HTMLSpanElement[] = []
-  createEffect(() => {
-    block.data
-    untrack(() => {if(focus() >= 0 && focus()+1 < block.data.length) forceFocus(focus(), 1)})
-  })
 
-  const forceFocus = (current: number, next: number) => {
-    refs[current+next].focus()
-  }
-
-  const handleInput = (e: InputEvent) => {
-    const newBlock = JSON.parse(JSON.stringify(block.data))
-
-    baseRef?.childNodes.forEach((node, index) => {
-      const element = node as HTMLElement
-      if(node.nodeType === 1){
-        if(element.className === 'bold'){
-          inline_parser(element.className, element.innerText).forEach(contents => {
-            if(contents.type !== element.className) newBlock.splice(index, 1, ...inline_parser(element.className, element.innerText))
-          })
-        }
-      }
-      if(node.nodeType === 3){
-        inline_parser('plain', element.nodeValue!).forEach(contents => {
-          if(contents.type !== 'plain') newBlock.splice(index, 1,...inline_parser('plain', element.nodeValue!))
-        })
-      }
-    })
-    if(newBlock.length > block.data.length) setBlock('data', () => newBlock)
-  }
-
-  const handleKeyDown = (e: KeyboardEvent) => {
-    const newBlock = JSON.parse(JSON.stringify(block.data))
-
-    const range = window.getSelection()?.getRangeAt(0)
-    if(e.key == 'Backspace'){
-      if(range?.startContainer.parentElement?.innerText.length === 1){
-        baseRef?.childNodes.forEach((node, index) => {
-          if(node === range?.startContainer.parentElement){
-            newBlock.splice(index, 1)
-            setBlock('data', () => newBlock)
-          }
-        })
-      }
+  const handleInput = () => {
+    var previousTree = JSON.parse(JSON.stringify(tree()))
+    const newTree = additionalLexer(baseRef!, previousTree)
+    
+    if(countBranches(newTree) !== countBranches(tree())){
+      setText(reverseLexer(baseRef!))
     }
   }
 
@@ -74,18 +40,12 @@ const TextBase: Component = () => {
       style={style}
       class="text-block-base"
       contentEditable={true}
-      onInput={(e) => handleInput(e)}
-      onKeyDown={(e) => handleKeyDown(e)}
+      onInput={() => handleInput()}
     >
-      {block.data.map((data: {type:string, content:string}, index: number) => (
+      {tree().children.map((branch: {type:string, content:string, children: any[]}, index: number) => (
         <Dynamic
-          component={components['./Components/'+data.type+'.tsx'].default}
-          ref={refs[index]}
-          setFocus={setFocus}
-          forceFocus={forceFocus}
-          index={index}
-          block={block.data}
-          setBlock={setBlock}
+          component={components['./Components/'+branch.type+'.tsx'].default}
+          branch={branch}
         />
       ))}
     </div>
