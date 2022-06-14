@@ -2,6 +2,15 @@ interface params {
   [key: string]: any
 }
 
+const head_signs: params = {
+  h1: {
+    reg: '# '
+  },
+  h2: {
+    reg: '## '
+  }
+}
+
 const inline_signs: params = {
   equation: {
     reg: '\\${1,1}(.+?)\\${1,1}',
@@ -63,6 +72,15 @@ const generateChildren = (sentence: string) => {
   }
 
   return splited_sentence
+}
+
+export const checkHeadOfSentence = (sentence: string) => {
+  var sign = ''
+  Object.keys(head_signs).forEach((key: string) => {
+    const reg = new RegExp('^'+head_signs[key].reg)
+    if(sentence.match(reg)) sign = key
+  })
+  return sign
 }
 
 export const Lexer = (parent: Branch) => {

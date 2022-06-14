@@ -18,6 +18,12 @@ Notionは優れているが、
 
 ことを目指す。
 
+### 疑問
+- 多分現在気楽に色々書きやすそうなのはGFM
+- どこまでWYSIWYGにするか？
+  - 細かく描画されるのもチラつくのが嫌なので、ある程度まとめてにしたい。
+  - 前作のようにブロック単位では複雑な数式入力の時に旨味がない、下の方に編集中のを描画させるておくのもダサい...
+
 ### 開発計画
 - [ ] 基幹部
   - [ ] データ設計
@@ -43,6 +49,7 @@ Notionは優れているが、
     - [ ] 行中のMarkdown(もしくはそれに類するコマンド)で以下のブロックに変換
       - 太字
       - 斜体
+      - 打ち消し線
       - 数式(inline)
   - [ ] DBブロック
 
@@ -59,45 +66,36 @@ Notionは優れているが、
 ```
 {
   id: ulid,
-  type: Text(or List or ...),
-  config: { indent: 0, type: こっち?}
-  contents:[
-    { text: "あれこれ", type: 'plain' },
-    { text: "色々", type: 'bold' },
-    { text: "\sum", type: 'tex' },
-  ],
+  config: { indent: 0, type: Text(or List or ...)}
+  data: {
+      text: "- **Bold**~~Strikethrough~~$KaTeX$\n"
+    },
   created_at: ?,
 }
 ```
-- (Textブロックにおいて)上のように、要素を分割することで、良い塩梅にWYSIWYGで書けそうだし、拡張性も高まるか
-  - 太字、打ち消し線がnestしている場合はどうする？
-  - ListやHeaderとはどこまで分割する？文章のParagraphとは？ => Pageの設計次第か
-- [ ] Page
-```
-{
-  id: ulid,
-  type: Text(or List or ...)
-  contents:[
-    [blockのulid, ...],
-    ...
-  ],
-  created_at: ?,
-  updated_at: ?
-}
-```
-- 並行においたブロックの下に何か付け加えたいとなった時この形式では...
-- Paragraphの区別がつかないParagraphを追加するか？
-- ページもブロックも表示が異なるだけで同じデータ形式にするか？
 
 - [ ] Paragraph
 ```
 {
   id: ulid,
   contents:[
-    [blockのulid, ...],
-    ...
+    blockのulid, ...,
   ],
   created_at: ?
+}
+```
+
+- [ ] Page
+```
+{
+  id: ulid,
+  type: Text(or List or ...)
+  contents:[
+    [Paragraphのulid, ...],
+    ...
+  ],
+  created_at: ?,
+  updated_at: ?
 }
 ```
 
