@@ -93,6 +93,14 @@ export const checkHeadOfSentence = (sentence: string) => {
   return sign
 }
 
+export const removeHeadOfSentence = (sentence: string, block: string) => {
+  var reg = new RegExp('')
+  Object.keys(head_signs).forEach(key => {
+    if(head_signs[key].block === block) reg = new RegExp('^'+head_signs[key].reg)
+  })
+  return sentence.split(reg)[1]
+}
+
 export const Lexer = (parent: Branch) => {
   var root = parent
   var sentence = parent.content

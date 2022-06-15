@@ -11,6 +11,14 @@ type Block = {
   data: any
 }
 
+const generateInitialBlock = (id: string, type: string) => {
+  return {
+    id: id,
+    config: {indent: 0, type: type},
+    data: {text: ""},
+  }
+}
+
 const initialBlocks: Block[] = [
   {
     id: "01G4FQHW27SQ4AYTNTQV1E7PND",
@@ -48,8 +56,25 @@ const mutationMethods = (key: string, setStore: any) => {
     );
   };
 
+  const patchBlockData = (id: string, newData: any) => {
+    setStore(
+      (block: Block) => block.id === id,
+      produce((block: Block) => block.data = newData)
+    );
+  };
+
+  const addBlock = (id: string, type: string) => {
+    setStore(
+      produce((store: Block[]) => {
+        store.push(generateInitialBlock(id, type))
+      }
+    ))
+  }
+
   const mutations: actions = {
-    patch: patchBlock
+    patch: patchBlock,
+    patchData: patchBlockData,
+    add: addBlock
   };
 
   return mutations[key]

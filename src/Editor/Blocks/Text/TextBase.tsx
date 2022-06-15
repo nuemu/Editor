@@ -1,10 +1,12 @@
 import { Component, createSignal, createMemo, onMount } from 'solid-js';
 import { Dynamic } from "solid-js/web"
-import { checkHeadOfSentence, Lexer, reverseLexer } from '../../../Components/Lexer';
+import { ulid } from 'ulid';
+import { checkHeadOfSentence, Lexer, removeHeadOfSentence, reverseLexer } from '../../../Components/Lexer';
 
 const components = import.meta.globEager('./Components/textarea/*.tsx')
 
 import BlocksStore from '../../../Store/Blocks'
+import ParagraphStore from '../../../Store/Paragraphs'
 import SystemStore from '../../../Store/System'
 
 const style: any = {
@@ -22,6 +24,7 @@ const style: any = {
 
 const TextBase: Component<{id: string}> = (props: {id: string}) => {
   const {block_getters, block_mutations} = BlocksStore
+  const {paragraph_getters, paragraph_mutations} = ParagraphStore
   const {getters} = SystemStore
   const [block, setBlock] = createSignal(block_getters('get')(props.id))
   const [text, setText] = createSignal(block().data.text)
@@ -39,7 +42,14 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
     if(key){
       const newBlock = JSON.parse(JSON.stringify(block()))
       newBlock.config.type = key
+      newBlock.data.text = removeHeadOfSentence(reverseLexer(baseRef!), key)
       block_mutations('patch')(props.id, newBlock)
+    }
+    else{
+      const newBlock = JSON.parse(JSON.stringify(block()))
+      newBlock.data.text = reverseLexer(baseRef!)
+      setBlock(newBlock)
+      block_mutations('patchData')(props.id, {text: baseRef!.innerText})
     }
   }
 
@@ -52,6 +62,13 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
     if(e.key === 'Tab' && e.shiftKey){
       e.preventDefault()
       if(indent() > 0) setIndent(indent()-1)
+    }
+
+    if(e.key === 'Enter'){
+      e.preventDefault()
+      const id = ulid()
+      block_mutations('add')(id, 'Text')
+      paragraph_mutations('add')("01G5KAR1FY949SY0R2DV4RGR7M", props.id, id)
     }
   }
 

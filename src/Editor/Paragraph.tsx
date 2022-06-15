@@ -1,12 +1,14 @@
-import { Component, For } from 'solid-js';
+import { Component, createMemo, For } from 'solid-js';
 
 import BlockBase from './Blocks/BlockBase'
+import ParagraphStore from '../Store/Paragraphs';
 
 const Paragraph: Component = () => {
-  const paragraph = ["01G4FQHW27SQ4AYTNTQV1E7PND", "01G5JBTCC1JN8S3G4T8AA2FP2J"]
+  const { paragraph_getters } = ParagraphStore
+  const paragraph = createMemo(() => paragraph_getters('get')("01G5KAR1FY949SY0R2DV4RGR7M"))
   
   return (
-    <For each={paragraph}>{(id: string) =>
+    <For each={paragraph().blocks}>{(id: string) =>
       <BlockBase id={id}/>}
     </For>
   )
