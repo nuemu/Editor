@@ -1,20 +1,10 @@
 import { Component, createSignal, createMemo, onMount } from 'solid-js';
 import { Dynamic } from "solid-js/web"
-import { additionalLexer, checkHeadOfSentence, Lexer, reverseLexer } from '../../../Components/Lexer';
-
-import { getBlock } from '../../../Store/Blocks'
+import { checkHeadOfSentence, Lexer, reverseLexer } from '../../../Components/Lexer';
 
 const components = import.meta.globEager('./Components/textarea/*.tsx')
-import Head from './Components/head/Head'
 
-const countBranches = (branch: any) => {
-  var sum = 0;
-  branch.children.forEach((child: any) => {
-    if(child.children.length === 0) sum += 1
-    else sum += countBranches(child)
-  })
-  return sum
-}
+import BlocksStore from '../../../Store/Blocks'
 
 const style: any = {
   base:{
@@ -30,32 +20,25 @@ const style: any = {
 }
 
 const TextBase: Component = () => {
-  const block = {config: {indent: 0, type: 'Text'}, data: {text: 'loading...'}}
-
-  onMount(() => {
-    (async () =>  {
-      const block = await getBlock("01G4FQHW27SQ4AYTNTQV1E7PND")
-      setText(block.data.text)
-    })()
-  })
-
-  const [text, setText] = createSignal(block!.data.text)
-  const [type, setType] = createSignal('Text')
-  const [indent, setIndent] = createSignal(block!.config.indent)
+  const {getters, mutations} = BlocksStore
+  const [block, setBlock] = createSignal(getters('get')("01G4FQHW27SQ4AYTNTQV1E7PND"))
+  const [text, setText] = createSignal(block().data.text)
+  const [indent, setIndent] = createSignal(block().config.indent)
   const tree = createMemo(() => Lexer({type: 'root', content: text(), children: []}))
 
   var baseRef: HTMLDivElement|undefined = undefined
 
-  const handleInput = () => {
-    var previousTree = JSON.parse(JSON.stringify(tree()))
-    const newTree = additionalLexer(baseRef!, previousTree)
-    
-    /*if(countBranches(newTree) !== countBranches(tree())){
-      setText(reverseLexer(baseRef!))
-    }*/
+  onMount(() => {
+    baseRef?.focus()
+  })
 
+  const handleInput = () => {
     const key = checkHeadOfSentence(reverseLexer(baseRef!))
-    console.log(key)
+    if(key){
+      const newBlock = JSON.parse(JSON.stringify(block()))
+      newBlock.config.type = key
+      mutations('patch')("01G4FQHW27SQ4AYTNTQV1E7PND", newBlock)
+    }
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -73,7 +56,6 @@ const TextBase: Component = () => {
   return (
     <div class="text-block-base" style={style.base}>
       <div style={{'margin-left': 3*indent()+'%'}}/>
-      <Head />
       <div
         class="text-block-textarea"
         ref={baseRef}
@@ -81,7 +63,6 @@ const TextBase: Component = () => {
         contentEditable={true}
         onInput={() => handleInput()}
         onKeyDown={(e) => handleKeyDown(e)}
-        onFocus={() => console.log("sample")}
       >
         {tree().children.map((branch: {type:string, content:string, children: any[]}, index: number) => (
           <Dynamic

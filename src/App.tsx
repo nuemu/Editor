@@ -4,9 +4,7 @@ import Base from './Editor/Base'
 
 const App: Component = () => {
   return (
-    <div>
-      <Base />
-    </div>
+    <Base />
   )
 }
 

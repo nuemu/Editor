@@ -1,12 +1,10 @@
 import type { Component } from 'solid-js';
 
-import TextBase from './Blocks/Text/Base'
+import BlockBase from './Blocks/Base'
 
 const Base: Component = () => {
   return (
-    <div>
-      <TextBase />
-    </div>
+    <BlockBase />
   )
 }
 

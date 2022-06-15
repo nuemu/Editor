@@ -4,10 +4,20 @@ interface params {
 
 const head_signs: params = {
   h1: {
-    reg: '# '
+    reg: '# ',
+    block: 'H1'
   },
   h2: {
-    reg: '## '
+    reg: '## ',
+    block: 'H2'
+  },
+  h3: {
+    reg: '### ',
+    block: 'H3'
+  },
+  list: {
+    reg: '- ',
+    block: 'List'
   }
 }
 
@@ -78,7 +88,7 @@ export const checkHeadOfSentence = (sentence: string) => {
   var sign = ''
   Object.keys(head_signs).forEach((key: string) => {
     const reg = new RegExp('^'+head_signs[key].reg)
-    if(sentence.match(reg)) sign = key
+    if(sentence.match(reg)) sign = head_signs[key].block
   })
   return sign
 }
