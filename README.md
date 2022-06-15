@@ -27,7 +27,8 @@ Notionは優れているが、
 ### 開発計画
 - [ ] 基幹部
   - [ ] データ設計
-    - [ ] ブロック
+    - [x] ブロック
+    - [ ] パラグラフ
     - [ ] ページ
     - [ ] データリスト
     - [ ] FrontDB(利用者が触れるDB)
@@ -42,15 +43,15 @@ Notionは優れているが、
 - [ ] ブロックの実装
   - [ ] Textブロック
     - [ ] 行頭のMarkdown(もしくはそれに類するコマンド)で以下のブロックに変換
-      - H*ブロック
-      - Listブロック
-      - コードブロック
-      - 数式ブロック(display mode)
-    - [ ] 行中のMarkdown(もしくはそれに類するコマンド)で以下のブロックに変換
-      - 太字
-      - 斜体
-      - 打ち消し線
-      - 数式(inline)
+      - [x] H*ブロック
+      - [ ] Listブロック
+      - [ ] コードブロック
+      - [ ] 数式ブロック(display mode)
+    - [ ] 行中のMarkdown(もしくはそれに類するコマンド)で以下のブロック?に変換
+      - [x] 太字
+      - [ ] 斜体
+      - [x] 打ち消し線
+      - [x] 数式(inline)
   - [ ] DBブロック
 
 - [ ] ページの実装
@@ -62,15 +63,14 @@ Notionは優れているが、
     - [ ] 必要？
 
 ### データ設計
-- [ ] Block
+- [x] Block
 ```
 {
   id: ulid,
   config: { indent: 0, type: Text(or List or ...)}
   data: {
-      text: "- **Bold**~~Strikethrough~~$KaTeX$\n"
-    },
-  created_at: ?,
+    text: "- **Bold**~~Strikethrough~~$KaTeX$\n"
+  }
 }
 ```
 
@@ -81,7 +81,6 @@ Notionは優れているが、
   contents:[
     blockのulid, ...,
   ],
-  created_at: ?
 }
 ```
 
