@@ -1,4 +1,4 @@
-import { Component, createSignal, createMemo, onMount } from 'solid-js';
+import { Component, createSignal, createMemo, onMount, Show, createEffect, untrack } from 'solid-js';
 import { Dynamic } from "solid-js/web"
 import { ulid } from 'ulid';
 import { checkHeadOfSentence, Lexer, removeHeadOfSentence, reverseLexer } from '../../../Components/Lexer';
@@ -23,10 +23,10 @@ const style: any = {
 }
 
 const TextBase: Component<{id: string}> = (props: {id: string}) => {
-  const {block_getters, block_mutations} = BlocksStore
-  const {paragraph_getters, paragraph_mutations} = ParagraphStore
-  const {getters} = SystemStore
-  const [block, setBlock] = createSignal(block_getters('get')(props.id))
+  const { block_getters, block_mutations } = BlocksStore
+  const { paragraph_getters, paragraph_mutations } = ParagraphStore
+  const { system_getters, system_mutations } = SystemStore
+  const block = createMemo(() => block_getters('get')(props.id))
   const [text, setText] = createSignal(block().data.text)
   const [indent, setIndent] = createSignal(block().config.indent)
   const tree = createMemo(() => Lexer({type: 'root', content: text(), children: []}))
@@ -37,18 +37,20 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
     baseRef?.focus()
   })
 
+  createEffect(() => {
+    system_getters('focus')();
+    untrack(() => setText(block_getters('get')(props.id).data.text));
+  })
+
   const handleInput = () => {
-    const key = checkHeadOfSentence(reverseLexer(baseRef!))
+    const key = checkHeadOfSentence(baseRef!.innerText)
     if(key){
-      const newBlock = JSON.parse(JSON.stringify(block()))
+      const newBlock = JSON.parse(JSON.stringify(block_getters('get')(props.id)))
       newBlock.config.type = key
-      newBlock.data.text = removeHeadOfSentence(reverseLexer(baseRef!), key)
+      newBlock.data.text = removeHeadOfSentence(baseRef!.innerText, key)
       block_mutations('patch')(props.id, newBlock)
     }
     else{
-      const newBlock = JSON.parse(JSON.stringify(block()))
-      newBlock.data.text = reverseLexer(baseRef!)
-      setBlock(newBlock)
       block_mutations('patchData')(props.id, {text: baseRef!.innerText})
     }
   }
@@ -75,21 +77,40 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
   return (
     <div class="text-block-base" style={style.base}>
       <div style={{'margin-left': 3*indent()+'%'}}/>
-      <div
-        class="text-block-textarea"
-        ref={baseRef}
-        style={style.textarea}
-        contentEditable={true}
-        onInput={() => handleInput()}
-        onKeyDown={(e) => handleKeyDown(e)}
-      >
-        {tree().children.map((branch: {type:string, content:string, children: any[]}, index: number) => (
-          <Dynamic
-            component={components['./Components/textarea/'+branch.type+'.tsx'].default}
-            branch={branch}
-          />
-        ))}
-      </div>
+      <Show when={system_getters('focus')() === props.id} fallback={
+        <Show when={text() !== ''} fallback={
+          <div
+            class="text-block-view"
+            style={{width: '100%'}}
+            onMouseOver={() => system_mutations('patchFocus')(props.id)}
+          >
+            &nbsp;
+          </div>
+        }>
+        <div
+          class="text-block-view"
+          style={{width: '100%'}}
+          onMouseOver={() => system_mutations('patchFocus')(props.id)}
+        >
+          {tree().children.map((branch: {type:string, content:string, children: any[]}, index: number) => (
+            <Dynamic
+              component={components['./Components/textarea/'+branch.type+'.tsx'].default}
+              branch={branch}
+            />
+          ))}
+        </div>
+        </Show>
+      }>
+        <div
+          class="text-block-textarea"
+          ref={baseRef}
+          style={style.textarea}
+          contentEditable={true}
+          onInput={() => handleInput()}
+          onKeyDown={(e) => handleKeyDown(e)}
+          innerText={text()}
+        />
+      </Show>
     </div>
   )
 }

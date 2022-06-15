@@ -26,7 +26,7 @@ const mutationMethods = (key: string, setStore: any) => {
   };
 
   const mutations: actions = {
-    patch: patchFocus
+    patchFocus: patchFocus
   };
 
   return mutations[key]
@@ -34,18 +34,18 @@ const mutationMethods = (key: string, setStore: any) => {
 
 const systemStore = () => {
   const [store, setStore] = createStore({
-    focus: 0
+    focus: "none"
   });
 
-  const getters = (key: string) => {
+  const system_getters = (key: string) => {
     return getterMethods(key, store)
   }
 
-  const mutations = (key: string) => {
+  const system_mutations = (key: string) => {
     return mutationMethods(key, setStore)
   }
 
-  return {getters, mutations}
+  return {system_getters, system_mutations}
 }
 
 export default createRoot(systemStore)

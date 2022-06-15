@@ -2,15 +2,6 @@ import { Component, createSignal, createMemo, onMount } from 'solid-js';
 
 import TextBase from '../Text/TextBase';
 
-const countBranches = (branch: any) => {
-  var sum = 0;
-  branch.children.forEach((child: any) => {
-    if(child.children.length === 0) sum += 1
-    else sum += countBranches(child)
-  })
-  return sum
-}
-
 const style: any = {
   base:{
     width: '100%',
@@ -26,7 +17,11 @@ const style: any = {
 const Base: Component<{id: string}> = (props: {id: string}) => {
   return (
     <div class="list-block-base" style={style.base}>
-      <div class="list-mark" style={style.list}>
+      <div
+        class="list-mark"
+        style={style.list}
+        contentEditable={true}
+      >
         1.
       </div>
       <TextBase id={props.id}/>
