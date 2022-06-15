@@ -30,10 +30,10 @@ const style: any = {
   }
 }
 
-const Base: Component = () => {
+const Base: Component<{id: string}> = (props: {id: string}) => {
   return (
     <div class="head3-block-base" style={style.base}>
-      <TextBase />
+      <TextBase id={props.id}/>
     </div>
   )
 }

@@ -11,6 +11,19 @@ type Block = {
   data: any
 }
 
+const initialBlocks: Block[] = [
+  {
+    id: "01G4FQHW27SQ4AYTNTQV1E7PND",
+    config: {indent: 0, type: 'Text'},
+    data: {text: "PLAIN**~~BOLD~~**$c=\\pm\\sqrt{a^2+b^2}$~~Sam**ple**~~"},
+  },
+  {
+    id: "01G5JBTCC1JN8S3G4T8AA2FP2J",
+    config: {indent: 0, type: 'Text'},
+    data: {text: "Sample"},
+  },
+]
+
 type actions = {
   [key: string]: any
 }
@@ -21,7 +34,7 @@ const getterMethods = (key: string, blocks: Block[]) => {
   };
 
   const getters: actions = {
-    get: getBlock
+    get: getBlock,
   }
 
   return getters[key]
@@ -29,39 +42,31 @@ const getterMethods = (key: string, blocks: Block[]) => {
 
 const mutationMethods = (key: string, setStore: any) => {
   const patchBlock = (id: string, newBlock: Block) => {
-    setStore('blocks', produce((blocks: Block[]) => {
-      const index = blocks.findIndex((block: Block)=> block.id === id);
-      blocks[index] = newBlock;
-    }));
+    setStore(
+      (block: Block) => block.id === id,
+      newBlock
+    );
   };
 
   const mutations: actions = {
     patch: patchBlock
-  }
+  };
 
   return mutations[key]
 }
 
 const blocksStore = () => {
-  const [store, setStore] = createStore<{blocks: Block[]}>({
-    blocks: [
-      {
-        id: "01G4FQHW27SQ4AYTNTQV1E7PND",
-        config: {indent: 0, type: 'Text'},
-        data: {text: "PLAIN**~~BOLD~~**$c=\\pm\\sqrt{a^2+b^2}$~~Sam**ple**~~"},
-      }
-    ]
-  });
+  const [store, setStore] = createStore<Block[]>(initialBlocks);
 
-  const getters = (key: string) => {
-    return getterMethods(key, JSON.parse(JSON.stringify(store.blocks)))
+  const block_getters = (key: string) => {
+    return getterMethods(key, JSON.parse(JSON.stringify(store)))
   }
 
-  const mutations = (key: string) => {
+  const block_mutations = (key: string) => {
     return mutationMethods(key, setStore)
   }
 
-  return {getters, mutations}
+  return {block_getters, block_mutations}
 }
 
 export default createRoot(blocksStore)

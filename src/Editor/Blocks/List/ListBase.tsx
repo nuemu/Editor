@@ -23,13 +23,13 @@ const style: any = {
   }
 }
 
-const Base: Component = () => {
+const Base: Component<{id: string}> = (props: {id: string}) => {
   return (
     <div class="list-block-base" style={style.base}>
       <div class="list-mark" style={style.list}>
         1.
       </div>
-      <TextBase />
+      <TextBase id={props.id}/>
     </div>
   )
 }

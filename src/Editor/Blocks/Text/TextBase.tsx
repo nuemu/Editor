@@ -5,6 +5,7 @@ import { checkHeadOfSentence, Lexer, reverseLexer } from '../../../Components/Le
 const components = import.meta.globEager('./Components/textarea/*.tsx')
 
 import BlocksStore from '../../../Store/Blocks'
+import SystemStore from '../../../Store/System'
 
 const style: any = {
   base:{
@@ -19,9 +20,10 @@ const style: any = {
   }
 }
 
-const TextBase: Component = () => {
-  const {getters, mutations} = BlocksStore
-  const [block, setBlock] = createSignal(getters('get')("01G4FQHW27SQ4AYTNTQV1E7PND"))
+const TextBase: Component<{id: string}> = (props: {id: string}) => {
+  const {block_getters, block_mutations} = BlocksStore
+  const {getters} = SystemStore
+  const [block, setBlock] = createSignal(block_getters('get')(props.id))
   const [text, setText] = createSignal(block().data.text)
   const [indent, setIndent] = createSignal(block().config.indent)
   const tree = createMemo(() => Lexer({type: 'root', content: text(), children: []}))
@@ -37,7 +39,7 @@ const TextBase: Component = () => {
     if(key){
       const newBlock = JSON.parse(JSON.stringify(block()))
       newBlock.config.type = key
-      mutations('patch')("01G4FQHW27SQ4AYTNTQV1E7PND", newBlock)
+      block_mutations('patch')(props.id, newBlock)
     }
   }
 
