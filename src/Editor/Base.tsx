@@ -4,7 +4,7 @@ import Paragraph from './Paragraph';
 
 const Base: Component = () => {
   return (
-    <Paragraph />
+    <div style={{width: '80%', left: '10%', position: 'relative'}}><Paragraph /></div>
   )
 }
 

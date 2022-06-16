@@ -23,25 +23,76 @@ console.log(ulid())
 
 const initialBlocks: Block[] = [
   {
-    id: "01G4FQHW27SQ4AYTNTQV1E7PND",
-    config: {indent: 0, type: 'H1'},
-    data: {text: "Block Style Editor"},
+      "id": "01G4FQHW27SQ4AYTNTQV1E7PND",
+      "config": {
+          "indent": 0,
+          "type": "H1"
+      },
+      "data": {
+          "text": "Block Style Editor"
+      }
   },
   {
-    id: "01G5NWJ7P2EBTWADXT9ABQQTS7",
-    config: {indent: 0, type: 'Text'},
-    data: {text: "GFM、ブロック単位の描画、先頭要素は即座に変換。"},
+      "id": "01G5NWJ7P2EBTWADXT9ABQQTS7",
+      "config": {
+          "indent": 0,
+          "type": "Text"
+      },
+      "data": {
+          "text": "GFM、ブロック単位の描画、先頭要素は即座に変換。"
+      }
   },
   {
-    id: "01G5NWK5FC5A3MBJK2MTYZ92J5",
-    config: {indent: 0, type: 'Text'},
-    data: {text: "PLAIN**~~BOLD~~**$c=\\pm\\sqrt{a^2+b^2}$~~Sam**ple**~~"},
+      "id": "01G5NWK5FC5A3MBJK2MTYZ92J5",
+      "config": {
+          "indent": 0,
+          "type": "Text"
+      },
+      "data": {
+          "text": "Inline Markdown & $\\KaTeX$サンプル：PLAIN**~~BOLD~~**$c=\\pm\\sqrt{a^2+b^2}$~~Sam**ple**~~"
+      }
   },
   {
-    id: "01G5JBTCC1JN8S3G4T8AA2FP2J",
-    config: {indent: 0, type: 'Code'},
-    data: {text: "class Sample\nend", language: 'ruby'},
+      "id": "01G5JBTCC1JN8S3G4T8AA2FP2J",
+      "config": {
+          "indent": 0,
+          "type": "Code"
+      },
+      "data": {
+        "text": "#include<iostream>\nusing namespace std;\n\nint main(){\n  cout << \"Hello Editor !\" << endl;\n}",
+        "language": "cpp"
+      }
   },
+  {
+      "id": "01G5PB8BXGW8F5A6CGMD147F07",
+      "config": {
+          "indent": 0,
+          "type": "List"
+      },
+      "data": {
+          "text": "Listブロックは製作中"
+      }
+  },
+  {
+      "id": "01G5PB8HYVNE8YQ527PZSXD94A",
+      "config": {
+          "indent": 0,
+          "type": "Text"
+      },
+      "data": {
+          "text": "例えばブロックの先頭で「### 」と入力すればh3ブロックに変換される"
+      }
+  },
+  {
+      "id": "01G5PB8R161RT048NVJQPKKQVK",
+      "config": {
+          "indent": 0,
+          "type": "Text"
+      },
+      "data": {
+          "text": ""
+      }
+  }
 ]
 
 type actions = {
