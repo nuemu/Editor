@@ -34,13 +34,15 @@ const Base: Component<{id: string}> = (props: {id: string}) => {
       const selection = window.getSelection()
       const range = selection?.getRangeAt(0)
 
-      const node = document.createTextNode("\n");
+      var node = document.createTextNode("\n");
+      if(range?.startContainer.nextSibling?.nodeValue === undefined) node = document.createTextNode("\n\n");
       range?.insertNode(node)
       setCode(hljs.highlight(baseRef!.innerText, {language: language()}).value)
 
       selection?.removeAllRanges();
       const newRange = new Range();
-      newRange.setStart(range?.startContainer.nextSibling!, 1)
+      if(range?.startContainer.nextSibling) newRange.setStart(range?.startContainer.nextSibling!, 1)
+      else newRange.setStart(range?.startContainer!, range?.startOffset!+1)
       selection?.addRange(newRange);
     }
 
@@ -55,7 +57,8 @@ const Base: Component<{id: string}> = (props: {id: string}) => {
 
       selection?.removeAllRanges();
       const newRange = new Range();
-      newRange.setStart(range?.startContainer.nextSibling!, 2)
+      if(range?.startContainer.nextSibling) newRange.setStart(range?.startContainer.nextSibling!, 2)
+      else newRange.setStart(range?.startContainer!, range?.startOffset!+2)
       selection?.addRange(newRange);
     }
   }
@@ -90,7 +93,7 @@ const Base: Component<{id: string}> = (props: {id: string}) => {
           contentEditable={true}
           onInput={() => handleInput()}
           onKeyDown={(e) => handleKeyDown(e)}
-          innerHTML={text()}
+          innerText={text()}
         />
       </pre>
     </>
