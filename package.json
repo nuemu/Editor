@@ -17,6 +17,7 @@
   "dependencies": {
     "@types/katex": "^0.14.0",
     "axios": "^0.27.2",
+    "highlight.js": "^11.5.1",
     "katex": "^0.15.6",
     "solid-js": "^1.4.2",
     "ulid": "^2.3.0"

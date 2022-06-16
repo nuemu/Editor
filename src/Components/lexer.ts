@@ -18,6 +18,14 @@ const head_signs: params = {
   list: {
     reg: '- ',
     block: 'List'
+  },
+  equation: {
+    reg: '\\*\\*',
+    block: 'Equation'
+  },
+  code: {
+    reg: '```',
+    block: 'Code'
   }
 }
 

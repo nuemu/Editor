@@ -19,16 +19,28 @@ const generateInitialBlock = (id: string, type: string) => {
   }
 }
 
+console.log(ulid())
+
 const initialBlocks: Block[] = [
   {
     id: "01G4FQHW27SQ4AYTNTQV1E7PND",
+    config: {indent: 0, type: 'H1'},
+    data: {text: "Block Style Editor"},
+  },
+  {
+    id: "01G5NWJ7P2EBTWADXT9ABQQTS7",
+    config: {indent: 0, type: 'Text'},
+    data: {text: "GFM、ブロック単位の描画、先頭要素は即座に変換。"},
+  },
+  {
+    id: "01G5NWK5FC5A3MBJK2MTYZ92J5",
     config: {indent: 0, type: 'Text'},
     data: {text: "PLAIN**~~BOLD~~**$c=\\pm\\sqrt{a^2+b^2}$~~Sam**ple**~~"},
   },
   {
     id: "01G5JBTCC1JN8S3G4T8AA2FP2J",
-    config: {indent: 0, type: 'Text'},
-    data: {text: "Sample"},
+    config: {indent: 0, type: 'Code'},
+    data: {text: "class Sample\nend", language: 'ruby'},
   },
 ]
 
