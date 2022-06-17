@@ -20,7 +20,7 @@ const head_signs: params = {
     block: 'List'
   },
   equation: {
-    reg: '\\*\\*',
+    reg: '\\${2,2}',
     block: 'Equation'
   },
   code: {
