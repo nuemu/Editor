@@ -47,7 +47,7 @@ const initialBlocks: Block[] = [
           "type": "Text"
       },
       "data": {
-          "text": "これが**1回目の強調**。これが**2回~~目~~の**強調。閉じてない**強調です。"
+          "text": "とりあえずで**強調**と~~打ち消し~~を実装、imageやurlのような特殊なものについては思案中。また、**記号のネストは~~不~~可能**。**のように閉じていない記号は無視される。"
       }
   },
   {
@@ -68,7 +68,7 @@ const initialBlocks: Block[] = [
           "type": "Text"
       },
       "data": {
-          "text": "Listブロックは製作中"
+          "text": "使ってないのでわからないが、Typora風？にしている。Caretが装飾文字の上にいくと、Markdown記法で表示され修正できる"
       }
   },
   {
@@ -78,7 +78,7 @@ const initialBlocks: Block[] = [
           "type": "Text"
       },
       "data": {
-          "text": "開発中"
+          "text": "鋭意開発中"
       }
   },
   {

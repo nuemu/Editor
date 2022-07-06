@@ -12,8 +12,10 @@ const Emphasis: Component<TextBlockProps> = (props: TextBlockProps) => {
   const [visible, setVisible] = createSignal(false)
 
   createEffect(() => {
-    if(props.lengthTree.start <= props.caret() && props.lengthTree.end >= props.caret()) setVisible(true)
-    else setVisible(false)
+    if(props.lengthTree){
+      if(props.lengthTree.start <= props.caret() && props.lengthTree.end >= props.caret()) setVisible(true)
+      else setVisible(false)
+    }
   })
 
   return (

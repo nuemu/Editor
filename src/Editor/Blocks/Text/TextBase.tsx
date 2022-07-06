@@ -193,6 +193,7 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
     block_mutations('patch')(props.id, {text: baseRef!.innerText})
     setTree(Lexer({type: 'root', content: baseRef!.innerText, children: []}))
     setCaretPosition()
+    setLengthTree(lengthList(tree()))
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {
