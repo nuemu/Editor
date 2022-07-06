@@ -1,160 +1,86 @@
 interface params {
-  [key: string]: any
-}
-
-const head_signs: params = {
-  h1: {
-    reg: '# ',
-    block: 'H1'
-  },
-  h2: {
-    reg: '## ',
-    block: 'H2'
-  },
-  h3: {
-    reg: '### ',
-    block: 'H3'
-  },
-  list: {
-    reg: '- ',
-    block: 'List'
-  },
-  equation: {
-    reg: '\\${2,2}',
-    block: 'Equation'
-  },
-  code: {
-    reg: '```',
-    block: 'Code'
+  [key: string]: {
+    reg: string
+    type: string
   }
 }
 
 const inline_signs: params = {
-  equation: {
-    reg: '\\${1,1}(.+?)\\${1,1}',
-    sign: '$'
-  },
-  emphasis: {
+  '**': {
     reg: '\\*{2,2}(.+?)\\*{2,2}',
-    sign: '**'
+    type: 'emphasis'
   },
-  strikethrough: {
-    reg: '~~(.+?)~~',
-    sign: '~~'
+  '~~': {
+    reg: '~{2,2}(.+?)~{2,2}',
+    type: 'strikethrough'
+  },
+  '[]()': {
+    reg: '\\[(.+?)\\]\\((.+?)\\)',
+    type: 'url'
+  },
+  '![]()': {
+    reg: '!\\[(.+?)\\]\\((.+?)\\)',
+    type: 'image'
   }
-  /*url: {
-    reg: '\\[(.+?)\\]{1,1}\\((.+?)\\){1,1}',
-  }*/
 }
 
 type Branch = {
   type: string,
   content: string,
-  option?: string,
+  additional_content?: string,
+  sign?: string,
+  ref? : HTMLSpanElement|undefined
   children: Branch[]
 }
 
-const generateChildren = (sentence: string) => {
-  var splited_sentence: Branch[] = []
-
+const generateChildren = (sentence: string, sign?: string) => {
+  var children: Branch[] = []
+  var regSign = ''
   var regStartPosition: number = sentence.length
-  var regType: string = 'text'
 
-  // Record which Reg hit first
-  Object.keys(inline_signs).some(key => {
-    const reg = new RegExp(inline_signs[key].reg)
+  // Check which sign hit first
+  Object.keys(inline_signs).forEach(sign => {
+    const reg = new RegExp(inline_signs[sign].reg)
     const position = sentence.search(reg)
+
     if(position > -1 && position < regStartPosition){
       regStartPosition = position
-      regType = key
+      regSign = sign
     }
   })
 
-  // generate child branches
-  if(regStartPosition < sentence.length){
-    // Hit only first one
-    const reg = new RegExp('(^.*?)'+inline_signs[regType].reg)
+  if(regSign !== ''){
+    const reg = new RegExp('(^.*?)'+inline_signs[regSign].reg)
     const split = sentence.split(reg)
-    if(split[1] !== '') splited_sentence.push({type: 'text', content: split[1], children:[]})
+    split.shift()
 
-    if(regType === 'url'){
-      splited_sentence.push({type: regType, content: split[2], option: split[3], children:[]})
-      split[3] = split[4]
+    if(regSign !== ('url' || 'image')){
+      children.push({type: 'text', content: split[0], children: []})
+      children.push({type: inline_signs[regSign].type, content: split[1], sign: regSign, children: []})
+      if(split[2] !== '') children = children.concat(generateChildren(split[2]))
     }
-    else splited_sentence.push({type: regType, content: split[2], children:[]})
-
-    if(split[3] !== '') splited_sentence = splited_sentence.concat(generateChildren(split[3]))
   }
-  else{
-    if(sentence !== '') splited_sentence.push({type: 'text', content: sentence, children:[]})
-  }
+  else children.push({type: 'text', content: sentence, children: []})
 
-  return splited_sentence
-}
-
-export const checkHeadOfSentence = (sentence: string) => {
-  var sign = ''
-  Object.keys(head_signs).forEach((key: string) => {
-    const reg = new RegExp('^'+head_signs[key].reg)
-    if(sentence.match(reg)) sign = head_signs[key].block
-  })
-  return sign
-}
-
-export const removeHeadOfSentence = (sentence: string, block: string) => {
-  var reg = new RegExp('')
-  Object.keys(head_signs).forEach(key => {
-    if(head_signs[key].block === block) reg = new RegExp('^'+head_signs[key].reg)
-  })
-  return sentence.split(reg)[1]
-}
-
-export const Lexer = (parent: Branch) => {
-  var root = parent
-  var sentence = parent.content
-
-  var children = generateChildren(sentence)
-  parent.children = children
-
-  if(children.length !== 1 || (children.length == 1 && children[0].type !== 'text')){
-    parent.content = ''
-    parent.children.forEach(child => {
-      Lexer(child)
-    })
+  if(sign){
+    children.splice(0, 0, {type: 'text', content: sign, children: []})
+    children.push({type: 'text', content: sign, children: []})
   }
 
-  return root
+  return children
 }
 
-export const additionalLexer = (element: HTMLElement, branch: Branch) => {
-  element.childNodes.forEach((childNode, index) => {
-    var childElement = childNode as HTMLElement
-    if(childNode.nodeType === 1 && Object.keys(inline_signs).includes(childElement.className)){
-      if(childElement.className !== 'equation') {
-        if(reverseLexer(childElement)) additionalLexer(childElement, branch.children[index])
-        else branch.children.splice(index, 1)
-      }
-      else branch.children[index].content = (childElement.children.item(1)! as HTMLElement).innerText
-    }
-    if(childNode.nodeType === 3 && childNode.nodeValue !== ''){
-      branch.children[index].content = childNode.nodeValue!
-      Lexer(branch.children[index])
-    }
+export const Lexer = (branch: Branch) => {
+  var children: Branch[]
+
+  if(branch.sign) children = generateChildren(branch.content, branch.sign)
+  else children = generateChildren(branch.content)
+
+  branch.children = children
+
+  children.forEach(child => {
+    if(child.type !== 'text') Lexer(child)
   })
+
   return branch
-}
-
-export const reverseLexer = (element: HTMLElement) => {
-  var sentence:string[] = []
-  element.childNodes.forEach(childNode => {
-    var childElement = childNode as HTMLElement
-    if(childNode.nodeType === 1 && Object.keys(inline_signs).includes(childElement.className)){
-      if(childElement.className !== 'equation') {
-        if(reverseLexer(childElement)) sentence.push(inline_signs[childElement.className].sign + reverseLexer(childElement) + inline_signs[childElement.className].sign)
-      }
-      else sentence.push(inline_signs[childElement.className].sign + (childElement.children.item(1)! as HTMLElement).innerText + inline_signs[childElement.className].sign)
-    }
-    if(childNode.nodeType === 3 && childNode.nodeValue !== '') sentence.push(childNode.nodeValue!)
-  })
-  return sentence.join('')
 }

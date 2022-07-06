@@ -4,7 +4,8 @@ import { Dynamic } from "solid-js/web"
 const components = import.meta.globEager('./*.tsx')
 
 const style: any = {
-  'font-weight': 'bolder'
+  'font-weight': 'bolder',
+  outline: 'none'
 }
 
 const Emphasis: Component = (props: any) => {

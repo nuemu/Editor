@@ -1,7 +1,7 @@
-import { Component, createSignal, createMemo, onMount, Show, createEffect, untrack } from 'solid-js';
+import { Component, createSignal, createMemo, onMount, Show, createEffect, untrack, For } from 'solid-js';
 import { Dynamic } from "solid-js/web"
 import { ulid } from 'ulid';
-import { checkHeadOfSentence, Lexer, removeHeadOfSentence, reverseLexer } from '../../../Components/Lexer';
+import { Lexer } from '../../../Components/Lexer';
 
 const components = import.meta.globEager('./Components/textarea/*.tsx')
 
@@ -22,14 +22,40 @@ const style: any = {
   }
 }
 
+type Branch = {
+  type: string,
+  content: string,
+  sign?: string
+  additional_content?: string,
+  ref?: HTMLSpanElement|undefined,
+  children: Branch[]
+}
+
+const refList = (branch: Branch) => {
+  var refs: (HTMLSpanElement|undefined)[] = []
+  if(branch.type === 'text'){
+    refs.push(branch.ref)
+  }
+
+  if(branch.children.length > 0){
+    branch.children.forEach(child => {
+      refs = refs.concat(refList(child))
+    })
+  }
+
+  return refs
+}
+
 const TextBase: Component<{id: string}> = (props: {id: string}) => {
   const { block_getters, block_mutations } = BlocksStore
   const { paragraph_getters, paragraph_mutations } = ParagraphStore
   const { system_getters, system_mutations } = SystemStore
+
   const block = createMemo(() => block_getters('get')(props.id))
   const [text, setText] = createSignal(block().data.text)
-  const [indent, setIndent] = createSignal(block().config.indent)
   const tree = createMemo(() => Lexer({type: 'root', content: text(), children: []}))
+  
+  const [caret, setCaret] = createSignal(0)
 
   var baseRef: HTMLDivElement|undefined = undefined
 
@@ -42,30 +68,75 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
     untrack(() => setText(block_getters('get')(props.id).data.text));
   })
 
+  const getElementPosition = () => {
+    var textLength: number = 0
+    var currentElement: HTMLSpanElement | undefined
+    const list = refList(tree())
+    var index = 0
+    for(const ref of list){
+      textLength += ref?.innerText.length || 0
+      if(textLength > caret()){
+        if(index !== 0) currentElement = list[index]
+        else currentElement = list[0]
+        break
+      }
+      index ++
+    }
+
+    return currentElement
+  }
+
+  const getNewCaretPosition = () => {
+    var length: number = 0
+    var textLength: number = 0
+    var caretPosition: number = 0
+    const list = refList(tree())
+    var index = 0
+    for(const ref of list){
+      textLength += ref?.innerText.length || 0
+      if(textLength > caret()){
+        caretPosition = caret()-length
+        break
+      }
+      length += ref?.innerText.length || 0
+      index ++
+    }
+
+    return caretPosition
+  }
+
+  const setCaretPositioin = () => {
+    const selection = window.getSelection()
+    const range = document.createRange()
+    range.setStart(getElementPosition()!.childNodes[0], getNewCaretPosition())
+    range.collapse(true)
+    selection!.removeAllRanges()
+    selection!.addRange(range)
+  }
+
+  const getCaretPosition = () => {
+    const selection: Selection | null = window.getSelection()
+    var textLength: number = 0
+    var caretPosition: number = 0
+
+    refList(tree()).forEach(ref => {
+      if(selection?.anchorNode?.parentElement === ref){
+        caretPosition = textLength + (selection?.anchorOffset || 0)
+      }
+      textLength += ref?.innerText.length || 0
+    })
+
+    return caretPosition
+  }
+
   const handleInput = () => {
-    const key = checkHeadOfSentence(baseRef!.innerText)
-    if(key){
-      const newBlock = JSON.parse(JSON.stringify(block_getters('get')(props.id)))
-      newBlock.config.type = key
-      newBlock.data.text = removeHeadOfSentence(baseRef!.innerText, key)
-      block_mutations('patch')(props.id, newBlock)
-    }
-    else{
-      block_mutations('patchData')(props.id, {text: baseRef!.innerText})
-    }
+    setCaret(getCaretPosition())
+    setText(baseRef!.innerText)
+    setCaretPositioin()
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if(e.key === 'Tab' && !e.shiftKey){
-      e.preventDefault()
-      setIndent(indent()+1)
-    }
-
-    if(e.key === 'Tab' && e.shiftKey){
-      e.preventDefault()
-      if(indent() > 0) setIndent(indent()-1)
-    }
-
+    console.log(getCaretPosition())
     if(e.key === 'Enter'){
       e.preventDefault()
       const id = ulid()
@@ -76,41 +147,24 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
 
   return (
     <div class="text-block-base" style={style.base}>
-      <div style={{'margin-left': 3*indent()+'%'}}/>
-      <Show when={system_getters('focus')() === props.id} fallback={
-        <Show when={text() !== ''} fallback={
-          <div
-            class="text-block-view"
-            style={{width: '100%'}}
-            onMouseOver={() => system_mutations('patchFocus')(props.id)}
-          >
-            &nbsp;
-          </div>
-        }>
-        <div
-          class="text-block-view"
-          style={{width: '100%'}}
-          onMouseOver={() => system_mutations('patchFocus')(props.id)}
-        >
-          {tree().children.map((branch: {type:string, content:string, children: any[]}, index: number) => (
+      <div
+        ref={baseRef}
+        contentEditable
+        class="text-block-textarea"
+        style={style.textarea}
+        onMouseOver={() => system_mutations('patchFocus')(props.id)}
+        onInput={() => handleInput()}
+        onKeyDown={(e) => handleKeyDown(e)}
+      >
+        <For each={tree().children}>
+          {branch => 
             <Dynamic
               component={components['./Components/textarea/'+branch.type+'.tsx'].default}
               branch={branch}
             />
-          ))}
-        </div>
-        </Show>
-      }>
-        <div
-          class="text-block-textarea"
-          ref={baseRef}
-          style={style.textarea}
-          contentEditable={true}
-          onInput={() => handleInput()}
-          onKeyDown={(e) => handleKeyDown(e)}
-          innerText={text()}
-        />
-      </Show>
+          }
+        </For> 
+      </div>
     </div>
   )
 }

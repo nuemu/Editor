@@ -49,7 +49,7 @@ const initialBlocks: Block[] = [
           "type": "Text"
       },
       "data": {
-          "text": "Inline Markdown & $\\KaTeX$サンプル：PLAIN**~~BOLD~~**$c=\\pm\\sqrt{a^2+b^2}$~~Sam**ple**~~"
+          "text": "これが**1回目の強調**。これが**2回~~目~~の**強調。閉じてない**強調です。"
       }
   },
   {
