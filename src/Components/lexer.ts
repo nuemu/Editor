@@ -63,8 +63,8 @@ const generateChildren = (sentence: string, sign?: string) => {
   else children.push({type: 'text', content: sentence, children: []})
 
   if(sign){
-    children.splice(0, 0, {type: 'text', content: sign, children: []})
-    children.push({type: 'text', content: sign, children: []})
+    children.splice(0, 0, {type: 'sign', content: sign, children: []})
+    children.push({type: 'sign', content: sign, children: []})
   }
 
   return children
@@ -79,7 +79,7 @@ export const Lexer = (branch: Branch) => {
   branch.children = children
 
   children.forEach(child => {
-    if(child.type !== 'text') Lexer(child)
+    if(child.type !== 'text' && child.type !== 'sign') Lexer(child)
   })
 
   return branch

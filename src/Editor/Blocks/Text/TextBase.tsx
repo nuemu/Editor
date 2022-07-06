@@ -33,7 +33,7 @@ type Branch = {
 
 const refList = (branch: Branch) => {
   var refs: (HTMLSpanElement|undefined)[] = []
-  if(branch.type === 'text'){
+  if(branch.type === 'text' || branch.type === 'sign'){
     refs.push(branch.ref)
   }
 
@@ -47,35 +47,48 @@ const refList = (branch: Branch) => {
 }
 
 const TextBase: Component<{id: string}> = (props: {id: string}) => {
+  // Stores
   const { block_getters, block_mutations } = BlocksStore
-  const { paragraph_getters, paragraph_mutations } = ParagraphStore
+  const { paragraph_mutations } = ParagraphStore
   const { system_getters, system_mutations } = SystemStore
 
+  // Signals
   const block = createMemo(() => block_getters('get')(props.id))
   const [text, setText] = createSignal(block().data.text)
   const tree = createMemo(() => Lexer({type: 'root', content: text(), children: []}))
   
   const [caret, setCaret] = createSignal(0)
 
+  // Non Reactive Variables
   var baseRef: HTMLDivElement|undefined = undefined
 
   onMount(() => {
     baseRef?.focus()
   })
 
+  // Clean Up DOM
   createEffect(() => {
-    system_getters('focus')();
-    untrack(() => setText(block_getters('get')(props.id).data.text));
+    tree()
+    baseRef!.childNodes.forEach(child => {
+      if(child.nodeName.includes('BR')) baseRef?.removeChild(child)
+      if(child.nodeType === 3) baseRef?.removeChild(child)
+    })
   })
 
-  const getElementPosition = () => {
-    var textLength: number = 0
+  const getNodeCaretOn = () => {
+    if(baseRef?.childNodes.length === 1) return refList(tree())[0]
+
+    var textLengthTotal: number = 0
     var currentElement: HTMLSpanElement | undefined
     const list = refList(tree())
     var index = 0
+    if(caret() === baseRef!.innerText.length){
+      return list[list.length-1]
+    }
+
     for(const ref of list){
-      textLength += ref?.innerText.length || 0
-      if(textLength > caret()){
+      textLengthTotal += ref?.innerText.length || 0
+      if(textLengthTotal > caret()){
         if(index !== 0) currentElement = list[index]
         else currentElement = list[0]
         break
@@ -83,23 +96,33 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
       index ++
     }
 
-    return currentElement
+    if(currentElement?.childNodes.length === 0) currentElement.appendChild(document.createTextNode(''))
+    // There is only one (Text)Node in ref
+    return currentElement?.childNodes[0]
   }
 
-  const getNewCaretPosition = () => {
-    var length: number = 0
-    var textLength: number = 0
+  const getCaretPositionOnNode = () => {
+    // StrangeMovement of ContentEditable
+    if(
+      baseRef?.childNodes.length === 1 &&
+      caret() === 0 &&
+      baseRef?.childNodes[0].nodeValue === null
+    ) return 1
+
+    var previousTextLengthTotal: number = 0
+    var textLengthTotal: number = 0
     var caretPosition: number = 0
     const list = refList(tree())
-    var index = 0
     for(const ref of list){
-      textLength += ref?.innerText.length || 0
-      if(textLength > caret()){
-        caretPosition = caret()-length
+      textLengthTotal += ref?.innerText.length || 0
+      if(textLengthTotal > caret()){
+        caretPosition = caret()-previousTextLengthTotal
         break
       }
-      length += ref?.innerText.length || 0
-      index ++
+      else if(caret() === baseRef!.innerText.length){
+        caretPosition = caret()-previousTextLengthTotal
+      }
+      previousTextLengthTotal += ref?.innerText.length || 0
     }
 
     return caretPosition
@@ -108,7 +131,7 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
   const setCaretPositioin = () => {
     const selection = window.getSelection()
     const range = document.createRange()
-    range.setStart(getElementPosition()!.childNodes[0], getNewCaretPosition())
+    range.setStart(getNodeCaretOn()!, getCaretPositionOnNode())
     range.collapse(true)
     selection!.removeAllRanges()
     selection!.addRange(range)
@@ -121,7 +144,8 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
 
     refList(tree()).forEach(ref => {
       if(selection?.anchorNode?.parentElement === ref){
-        caretPosition = textLength + (selection?.anchorOffset || 0)
+        // When delete only one letter, insert '\n' ... (Content Editable ?)
+        caretPosition = textLength + (selection?.anchorNode?.nodeValue === '\n' ? 0 : selection?.anchorOffset || 0)
       }
       textLength += ref?.innerText.length || 0
     })
@@ -131,17 +155,29 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
 
   const handleInput = () => {
     setCaret(getCaretPosition())
+    block_mutations('patch')(props.id, {text: baseRef!.innerText})
     setText(baseRef!.innerText)
     setCaretPositioin()
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    console.log(getCaretPosition())
     if(e.key === 'Enter'){
       e.preventDefault()
       const id = ulid()
       block_mutations('add')(id, 'Text')
       paragraph_mutations('add')("01G5KAR1FY949SY0R2DV4RGR7M", props.id, id)
+    }
+
+    if(e.key === 'Backspace'){
+      if(getCaretPosition() === 0 && window.getSelection()?.anchorOffset === window.getSelection()?.focusOffset){
+        e.preventDefault()
+      }
+    }
+
+    if(e.key === 'ArrowUp'){
+    }
+
+    if(e.key === 'ArrowDown'){
     }
   }
 
@@ -163,7 +199,7 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
               branch={branch}
             />
           }
-        </For> 
+        </For>
       </div>
     </div>
   )
