@@ -2,29 +2,35 @@ interface params {
   [key: string]: {
     reg: string
     type: string
+    start_sign: string,
+    middle_sign?: string,
+    end_sign: string
   }
 }
 
 const inline_signs: params = {
   '**': {
     reg: '\\*{2,2}(.+?)\\*{2,2}',
-    type: 'emphasis'
+    type: 'emphasis',
+    start_sign: '**',
+    end_sign: '**',
   },
   '~~': {
     reg: '~{2,2}(.+?)~{2,2}',
-    type: 'strikethrough'
+    type: 'strikethrough',
+    start_sign: '~~',
+    end_sign: '~~',
   },
   '[]()': {
     reg: '\\[(.+?)\\]\\((.+?)\\)',
-    type: 'url'
+    type: 'url',
+    start_sign: '[',
+    middle_sign: '](',
+    end_sign: ')',
   },
-  '![]()': {
-    reg: '!\\[(.+?)\\]\\((.+?)\\)',
-    type: 'image'
-  }
 }
 
-const generateChildren = (sentence: string, sign?: string) => {
+const generateChildren = (sentence: string, signs?:{start?: string, middle?: string, end?: string}) => {
   var children: Branch[] = []
   var regSign = ''
   var regStartPosition: number = sentence.length
@@ -45,17 +51,32 @@ const generateChildren = (sentence: string, sign?: string) => {
     const split = sentence.split(reg)
     split.shift()
 
-    if(regSign !== ('url' || 'image')){
+    const newChild: Branch = {
+      type: inline_signs[regSign].type,
+      content: split[1],
+      start_sign: inline_signs[regSign].start_sign,
+      end_sign: inline_signs[regSign].end_sign,
+      children: []
+    }
+
+    if(inline_signs[regSign].type !== 'url' && inline_signs[regSign].type !== 'image'){
       children.push({type: 'text', content: split[0], children: []})
-      children.push({type: inline_signs[regSign].type, content: split[1], sign: regSign, children: []})
+      children.push(newChild)
       if(split[2] !== '') children = children.concat(generateChildren(split[2]))
+    }
+    else{
+      children.push({type: 'text', content: split[0], children: []})
+      newChild.additional_content = split[2]
+      newChild.end_sign = inline_signs[regSign].middle_sign+ split[2] +inline_signs[regSign].end_sign
+      children.push(newChild)
+      if(split[3] !== '') children = children.concat(generateChildren(split[3]))
     }
   }
   else children.push({type: 'text', content: sentence, children: []})
 
-  if(sign){
-    children.splice(0, 0, {type: 'sign', content: sign, children: []})
-    children.push({type: 'sign', content: sign, children: []})
+  if(signs){
+    children.splice(0, 0, {type: 'sign', content: signs.start!, children: []})
+    children.push({type: 'sign', content: signs.end!, children: []})
   }
 
   return children
@@ -64,7 +85,7 @@ const generateChildren = (sentence: string, sign?: string) => {
 export const Lexer = (branch: Branch) => {
   var children: Branch[]
 
-  if(branch.sign) children = generateChildren(branch.content, branch.sign)
+  if(branch.start_sign) children = generateChildren(branch.content, {start: branch.start_sign, end: branch.end_sign})
   else children = generateChildren(branch.content)
 
   branch.children = children

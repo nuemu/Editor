@@ -45,7 +45,7 @@ type lengthTree = {
 
 const lengthList = (branch: Branch, start: number = 0) => {
   const nodeLength = (node: Branch) => {
-    if(node.sign) return 2 * node.sign.length + node.content.length
+    if(node.start_sign) return node.start_sign.length + node.content.length + node.end_sign!.length
     return node.content.length
   }
 

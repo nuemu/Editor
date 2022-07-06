@@ -47,7 +47,7 @@ const initialBlocks: Block[] = [
           "type": "Text"
       },
       "data": {
-          "text": "とりあえずで**強調**と~~打ち消し~~を実装、imageやurlのような特殊なものについては思案中。また、**記号のネストは~~不~~可能**。**のように閉じていない記号は無視される。"
+          "text": "とりあえずで**強調**、~~打ち消し~~、[URL](/)を実装、imageについては思案中。また、**記号のネストは~~不~~可能**。"
       }
   },
   {
@@ -68,7 +68,7 @@ const initialBlocks: Block[] = [
           "type": "Text"
       },
       "data": {
-          "text": "使ってないのでわからないが、Typora風？にしている。Caretが装飾文字の上にいくと、Markdown記法で表示され修正できる"
+          "text": "使ってないのでわからないが、[Typora風？](https://typora.io/)にしている。Caretが装飾文字の上にいくと、Markdown記法で表示され修正できる"
       }
   },
   {
@@ -78,7 +78,7 @@ const initialBlocks: Block[] = [
           "type": "Text"
       },
       "data": {
-          "text": "鋭意開発中"
+          "text": "**鋭意開発中**"
       }
   },
   {
@@ -88,7 +88,7 @@ const initialBlocks: Block[] = [
           "type": "Text"
       },
       "data": {
-          "text": ""
+          "text": "なお、**のように閉じていない記号は無視される。"
       }
   }
 ]
