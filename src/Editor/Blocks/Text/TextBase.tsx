@@ -76,16 +76,20 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
   })
 
   const getNodeCaretOn = () => {
-    if(baseRef?.childNodes.length === 1) return refList(tree())[0]
+    /***  There is only one (Text)Node in ref ***/
+
+    // If there is Only one Element
+    if(baseRef?.childNodes.length === 1) return refList(tree())[0]?.childNodes[0]
 
     var textLengthTotal: number = 0
     var currentElement: HTMLSpanElement | undefined
     const list = refList(tree())
-    var index = 0
+    // When Caret is on last
     if(caret() === baseRef!.innerText.length){
-      return list[list.length-1]
+      return list[list.length-1]?.childNodes[0]
     }
 
+    var index = 0
     for(const ref of list){
       textLengthTotal += ref?.innerText.length || 0
       if(textLengthTotal > caret()){
@@ -97,7 +101,6 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
     }
 
     if(currentElement?.childNodes.length === 0) currentElement.appendChild(document.createTextNode(''))
-    // There is only one (Text)Node in ref
     return currentElement?.childNodes[0]
   }
 
@@ -131,6 +134,7 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
   const setCaretPositioin = () => {
     const selection = window.getSelection()
     const range = document.createRange()
+    console.log(getNodeCaretOn())
     range.setStart(getNodeCaretOn()!, getCaretPositionOnNode())
     range.collapse(true)
     selection!.removeAllRanges()
