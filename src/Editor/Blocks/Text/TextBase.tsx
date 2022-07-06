@@ -115,7 +115,7 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
     var currentElement: HTMLSpanElement | undefined
     const list = refList(tree())
     // When Caret is on last
-    if(caret() === baseRef!.innerText.length){
+    if(caret() === innerText().length){
       return list[list.length-1]?.childNodes[0]
     }
 
@@ -152,7 +152,7 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
         caretPosition = caret()-previousTextLengthTotal
         break
       }
-      else if(caret() === baseRef!.innerText.length){
+      else if(caret() === innerText().length){
         caretPosition = caret()-previousTextLengthTotal
       }
       previousTextLengthTotal += ref?.innerText.length || 0
@@ -188,10 +188,29 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
 
   /******************** handle Something Methods ********************/
 
+  const innerText = () => {
+    const katexElements = baseRef!.getElementsByClassName('katex-base')
+    var text = baseRef!.innerText
+
+    Array.from(katexElements).forEach(element => {
+      const reg = (element as HTMLSpanElement).innerText
+      text = text!.split(reg).join('')
+      console.log(text)
+      if(element.children.item(0)!.className === 'katex-error'){
+        text = text.split('$$').join('$'+reg+'$')
+      }
+    })
+
+    text = text.split('\n\n').join('')
+    text = text.split('\n').join('')
+
+    return text
+  }
+
   const handleInput = () => {
     setCaretNumber()
-    block_mutations('patch')(props.id, {text: baseRef!.innerText})
-    setTree(Lexer({type: 'root', content: baseRef!.innerText, children: []}))
+    block_mutations('patch')(props.id, {text: innerText()})
+    setTree(Lexer({type: 'root', content: innerText(), children: []}))
     setCaretPosition()
     setLengthTree(lengthList(tree()))
   }
@@ -200,10 +219,10 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
     if(e.key === 'Enter'){
       e.preventDefault()
       const id = ulid()
-      if(caret() !== baseRef!.innerText.length){
-        block_mutations('add')(id, 'Text', baseRef!.innerText.substring(caret()))
-        block_mutations('patch')(props.id, {text: baseRef!.innerText.substring(0, caret())})
-        setTree(Lexer({type: 'root', content: baseRef!.innerText.substring(0, caret()), children: []}))
+      if(caret() !== innerText().length){
+        block_mutations('add')(id, 'Text', innerText().substring(caret()))
+        block_mutations('patch')(props.id, {text: innerText().substring(0, caret())})
+        setTree(Lexer({type: 'root', content: innerText().substring(0, caret()), children: []}))
         setCaretPosition()
       }
       else block_mutations('add')(id, 'Text')
@@ -222,7 +241,7 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
     }
 
     if(e.key === 'ArrowRight'){
-      if(getCaretPosition() < baseRef!.innerText.length) setCaretNumber(1)
+      if(getCaretPosition() < innerText().length) setCaretNumber(1)
     }
 
     if(e.key === 'ArrowUp'){

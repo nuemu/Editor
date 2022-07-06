@@ -57,8 +57,7 @@ const initialBlocks: Block[] = [
           "type": "Text"
       },
       "data": {
-        "text": "#include<iostream>\nusing namespace std;\n\nint main(){\n  cout << \"Hello Editor !\" << endl;\n}",
-        "language": "cpp"
+        "text": "数式ブロック$\\sum_{n=0}^\\infty$は現在作成中"
       }
   },
   {

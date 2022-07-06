@@ -21,6 +21,12 @@ const inline_signs: params = {
     start_sign: '~~',
     end_sign: '~~',
   },
+  '$': {
+    reg: '\\${1,1}(.+?)\\${1,1}',
+    type: 'equation',
+    start_sign: '$',
+    end_sign: '$',
+  },
   '[]()': {
     reg: '\\[(.+?)\\]\\((.+?)\\)',
     type: 'url',

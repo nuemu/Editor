@@ -28,7 +28,7 @@ const Emphasis: Component<TextBlockProps> = (props: TextBlockProps) => {
           component={components['./'+child.type+'.tsx'].default}
           branch={child}
           caret={props.caret}
-          lengthTree={props.lengthTree.children[index]}
+          lengthTree={props.lengthTree ? props.lengthTree.children[index] : null}
           visible={visible}
         />
       ))}

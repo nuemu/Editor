@@ -1,13 +1,12 @@
-import { Component, createEffect, createSignal } from 'solid-js';
+import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import { Dynamic } from "solid-js/web"
 
 const components = import.meta.globEager('./*.tsx')
 
-const style: any = {
-  'text-decoration': 'line-through'
-}
+import katex from 'katex'
+import 'katex/dist/katex.css'
 
-const Strikethrough: Component<TextBlockProps> = (props: TextBlockProps) => {
+const Equation: Component<TextBlockProps> = (props: TextBlockProps) => {
   const [visible, setVisible] = createSignal(false)
 
   createEffect(() => {
@@ -19,9 +18,16 @@ const Strikethrough: Component<TextBlockProps> = (props: TextBlockProps) => {
 
   return (
     <span
-      class="strikethrough"
-      style={style}
+      class="equation"
+      style={{position: 'relative'}}
     >
+      <span
+        class="katex-base"
+        contentEditable={false}
+        innerHTML={katex.renderToString(props.branch.content, {
+          throwOnError: false
+        })}
+      />
       {props.branch.children.map((child: {type:string, content:string, children: any[]}, index: number) => (
         <Dynamic
           component={components['./'+child.type+'.tsx'].default}
@@ -35,4 +41,4 @@ const Strikethrough: Component<TextBlockProps> = (props: TextBlockProps) => {
   )
 }
 
-export default Strikethrough
+export default Equation
