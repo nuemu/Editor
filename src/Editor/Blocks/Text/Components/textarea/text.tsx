@@ -1,6 +1,6 @@
 import { Component } from 'solid-js';
 
-const Text: Component = (props: any) => {
+const Text: Component<TextBlockProps> = (props: TextBlockProps) => {
   const {branch} = props
 
   return (

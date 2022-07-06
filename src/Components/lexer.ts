@@ -24,15 +24,6 @@ const inline_signs: params = {
   }
 }
 
-type Branch = {
-  type: string,
-  content: string,
-  additional_content?: string,
-  sign?: string,
-  ref? : HTMLSpanElement|undefined
-  children: Branch[]
-}
-
 const generateChildren = (sentence: string, sign?: string) => {
   var children: Branch[] = []
   var regSign = ''

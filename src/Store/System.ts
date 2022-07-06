@@ -10,8 +10,13 @@ const getterMethods = (key: string, store: any) => {
     return store.focus
   };
 
+  const getCaretPosition = () => {
+    return store.caretPosition
+  }
+
   const getters: actions = {
-    focus: getFocus
+    focus: getFocus,
+    caretPosition: getCaretPosition
   }
 
   return getters[key]
@@ -25,8 +30,16 @@ const mutationMethods = (key: string, setStore: any) => {
     );
   };
 
+  const patchCaretPosition = (caretPosition: number) => {
+    setStore(
+      'caretPosition',
+      caretPosition
+    )
+  }
+
   const mutations: actions = {
-    patchFocus: patchFocus
+    patchFocus: patchFocus,
+    patchCaretPosition: patchCaretPosition
   };
 
   return mutations[key]
@@ -34,7 +47,8 @@ const mutationMethods = (key: string, setStore: any) => {
 
 const systemStore = () => {
   const [store, setStore] = createStore({
-    focus: "none"
+    focus: "none",
+    caretPosition: 0,
   });
 
   const system_getters = (key: string) => {

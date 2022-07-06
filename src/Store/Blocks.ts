@@ -11,22 +11,20 @@ type Block = {
   data: any
 }
 
-const generateInitialBlock = (id: string, type: string) => {
+const generateInitialBlock = (id: string, type: string, data?: any) => {
   return {
     id: id,
     config: {indent: 0, type: type},
-    data: {text: ""},
+    data: {text: data ? data : ""},
   }
 }
-
-console.log(ulid())
 
 const initialBlocks: Block[] = [
   {
       "id": "01G4FQHW27SQ4AYTNTQV1E7PND",
       "config": {
           "indent": 0,
-          "type": "H1"
+          "type": "Text"
       },
       "data": {
           "text": "Block Style Editor"
@@ -56,7 +54,7 @@ const initialBlocks: Block[] = [
       "id": "01G5JBTCC1JN8S3G4T8AA2FP2J",
       "config": {
           "indent": 0,
-          "type": "Code"
+          "type": "Text"
       },
       "data": {
         "text": "#include<iostream>\nusing namespace std;\n\nint main(){\n  cout << \"Hello Editor !\" << endl;\n}",
@@ -67,7 +65,7 @@ const initialBlocks: Block[] = [
       "id": "01G5PB8BXGW8F5A6CGMD147F07",
       "config": {
           "indent": 0,
-          "type": "List"
+          "type": "Text"
       },
       "data": {
           "text": "Listブロックは製作中"
@@ -80,7 +78,7 @@ const initialBlocks: Block[] = [
           "type": "Text"
       },
       "data": {
-          "text": "例えばブロックの先頭で「### 」と入力すればh3ブロックに変換される"
+          "text": "開発中"
       }
   },
   {
@@ -126,10 +124,11 @@ const mutationMethods = (key: string, setStore: any) => {
     );
   };
 
-  const addBlock = (id: string, type: string) => {
+  const addBlock = (id: string, type: string, data?: any) => {
     setStore(
       produce((store: Block[]) => {
-        store.push(generateInitialBlock(id, type))
+        if(data)store.push(generateInitialBlock(id, type, data))
+        else store.push(generateInitialBlock(id, type))
       }
     ))
   }
