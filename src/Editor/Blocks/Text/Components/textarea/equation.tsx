@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, onMount } from 'solid-js';
+import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { Dynamic } from "solid-js/web"
 
 const components = import.meta.globEager('./*.tsx')
@@ -8,12 +8,7 @@ import 'katex/dist/katex.css'
 
 const style: any = {
   visible: {
-    position: 'absolute',
-    top: '16pt',
-    width: '500px',
-    left: 0,
-    'background-color': 'white',
-    'z-index': 10
+    display: 'inline-block',
   },
   invisible: {
     display: 'inline-block',
@@ -62,13 +57,16 @@ const Equation: Component<TextBlockProps> = (props: TextBlockProps) => {
           />
         ))}
       </span>
-      <span
-        contentEditable={false}
-        innerHTML={katex.renderToString(props.branch.content, {
-          throwOnError: false
-        })}
-        onClick={() => {setVisibility(style.visible); setVisible(true)}}
-      />
+      <Show when={!visible()}>
+        <span
+          class="katex-base"
+          contentEditable={false}
+          innerHTML={katex.renderToString(props.branch.content, {
+            throwOnError: false
+          })}
+          onClick={() => {setVisibility(style.visible); setVisible(true)}}
+        />
+      </Show>
     </span>
   )
 }

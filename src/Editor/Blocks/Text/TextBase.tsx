@@ -86,17 +86,13 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
   // Signals
   const block = createMemo(() => block_getters('get')(props.id))
   const [tree, setTree] = createSignal(Lexer({type: 'root', content: block().data.text, children: []}))
-  const [refs, setRefs] = createSignal(refList(tree()))
+  const [inputting, setInputting] = createSignal(false)
   
   const [caret, setCaret] = createSignal(0)
   const [lengthTree, setLengthTree] = createSignal(lengthList(tree()))
 
   // Non Reactive Variables
   var baseRef: HTMLDivElement|undefined = undefined
-
-  createEffect(() => {
-    if(system_getters('focus')() === props.id) baseRef?.focus()
-  })
 
   // Clean Up DOM
   createEffect(() => {
@@ -107,9 +103,9 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
     })
   })
 
+  // Gen lengthTree after mount
   onMount(() => {
     setLengthTree(lengthList(tree()))
-    setRefs(refList(tree()))
   })
 
   /******************** Caret Methods ********************/
@@ -203,7 +199,8 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
   /******************** handle Something Methods ********************/
 
   const innerText = () => {
-    var text = refList(tree()).map(ref => ref?.innerText).join('')
+    const newRefs = refList(tree()).filter(ref => document.contains((ref as Node)))
+    var text = newRefs.map(ref => ref?.innerText).join('')
 
     // If input initial letter on this textblock
     if(text.length === 0){
@@ -215,15 +212,17 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
   }
 
   const handleInput = () => {
-    setCaretNumber()
-    block_mutations('patch')(props.id, {text: innerText()})
-    setTree(Lexer({type: 'root', content: innerText(), children: []}))
-    setCaretPosition()
-    setLengthTree(lengthList(tree()))
+    if(!inputting()){
+      setCaretNumber()
+      block_mutations('patch')(props.id, {text: innerText()})
+      setTree(Lexer({type: 'root', content: innerText(), children: []}))
+      setCaretPosition()
+      setLengthTree(lengthList(tree()))
+    }
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if(e.key === 'Enter'){
+    if(e.key === 'Enter' && e.keyCode !== 229){
       e.preventDefault()
       const id = ulid()
       if(caret() !== innerText().length){
@@ -237,15 +236,6 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
     }
 
     if(e.key === 'Backspace'){
-      if(getNodeCaretOn()?.parentElement?.innerText.length === 1){
-        e.preventDefault()
-        const newTree = removeBranch(getNodeCaretOn()?.parentElement!, tree())
-        const text = refList(newTree).map(ref => ref?.innerText).join('')
-        block_mutations('patch')(props.id, {text: text})
-        setTree(Lexer({type: 'root', content: text, children: []}))
-        setCaretPosition()
-        setLengthTree(lengthList(newTree))     
-      }
       if(getCaretPosition() === 0 && window.getSelection()?.anchorOffset === window.getSelection()?.focusOffset){
         e.preventDefault()
       }
@@ -283,6 +273,8 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
         onInput={() => handleInput()}
         onKeyDown={(e) => handleKeyDown(e)}
         onClick={() => handleClick()}
+        onCompositionStart={() => {setInputting(true)}}
+        onCompositionEnd={() => {setInputting(false)}}
       >
         <For each={tree().children}>
           {(branch, index) => 
