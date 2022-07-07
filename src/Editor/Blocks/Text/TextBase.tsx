@@ -1,7 +1,7 @@
 import { Component, createSignal, createMemo, onMount, Show, createEffect, untrack, For } from 'solid-js';
 import { Dynamic } from "solid-js/web"
 import { ulid } from 'ulid';
-import { Lexer } from '../../../Components/Lexer';
+import { Lexer } from '../../../Components/TextParser';
 
 const components = import.meta.globEager('./Components/textarea/*.tsx')
 
