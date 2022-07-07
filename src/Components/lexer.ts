@@ -64,14 +64,13 @@ const generateChildren = (sentence: string, signs?:{start?: string, middle?: str
       end_sign: inline_signs[regSign].end_sign,
       children: []
     }
-
+    children.push({type: 'text', content: split[0], children: []})
+    
     if(inline_signs[regSign].type !== 'url' && inline_signs[regSign].type !== 'image'){
-      children.push({type: 'text', content: split[0], children: []})
       children.push(newChild)
       if(split[2] !== '') children = children.concat(generateChildren(split[2]))
     }
     else{
-      children.push({type: 'text', content: split[0], children: []})
       newChild.additional_content = split[2]
       newChild.end_sign = inline_signs[regSign].middle_sign+ split[2] +inline_signs[regSign].end_sign
       children.push(newChild)

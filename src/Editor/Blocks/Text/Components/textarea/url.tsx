@@ -11,6 +11,7 @@ const URL: Component<TextBlockProps> = (props: TextBlockProps) => {
       if(props.lengthTree.start <= props.caret() && props.lengthTree.end >= props.caret()) setVisible(true)
       else setVisible(false)
     }
+    if(!props.focus) setVisible(false)
   })
 
   return (
@@ -25,6 +26,7 @@ const URL: Component<TextBlockProps> = (props: TextBlockProps) => {
           caret={props.caret}
           lengthTree={props.lengthTree.children[index]}
           visible={visible}
+          focus={props.focus}
         />
       ))}
     </a>

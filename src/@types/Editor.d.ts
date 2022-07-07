@@ -15,4 +15,5 @@ type TextBlockProps = {
   caret: any,
   lengthTree: any,
   visible: any,
+  focus: boolean
 }

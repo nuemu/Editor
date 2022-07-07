@@ -16,6 +16,7 @@ const Emphasis: Component<TextBlockProps> = (props: TextBlockProps) => {
       if(props.lengthTree.start <= props.caret() && props.lengthTree.end >= props.caret()) setVisible(true)
       else setVisible(false)
     }
+    if(!props.focus) setVisible(false)
   })
 
   return (
@@ -30,6 +31,7 @@ const Emphasis: Component<TextBlockProps> = (props: TextBlockProps) => {
           caret={props.caret}
           lengthTree={props.lengthTree ? props.lengthTree.children[index] : null}
           visible={visible}
+          focus={props.focus}
         />
       ))}
     </span>

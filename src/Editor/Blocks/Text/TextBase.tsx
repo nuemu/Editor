@@ -37,6 +37,19 @@ const refList = (branch: Branch) => {
   return refs
 }
 
+const removeBranch = (ref: HTMLSpanElement | undefined, branch: Branch) => {
+  if(branch.children.length > 0){
+    branch.children.forEach((child, index: number) => {
+      if(child.ref === ref){
+        branch.children.splice(index, 1)
+      }
+      else removeBranch(ref, child)
+    })
+  }
+
+  return branch
+}
+
 type lengthTree = {
   start: number,
   end: number,
@@ -67,12 +80,13 @@ const lengthList = (branch: Branch, start: number = 0) => {
 const TextBase: Component<{id: string}> = (props: {id: string}) => {
   // Stores
   const { block_getters, block_mutations } = BlocksStore
-  const { paragraph_getters, paragraph_mutations } = ParagraphStore
+  const { paragraph_mutations } = ParagraphStore
   const { system_getters, system_mutations } = SystemStore
 
   // Signals
   const block = createMemo(() => block_getters('get')(props.id))
   const [tree, setTree] = createSignal(Lexer({type: 'root', content: block().data.text, children: []}))
+  const [refs, setRefs] = createSignal(refList(tree()))
   
   const [caret, setCaret] = createSignal(0)
   const [lengthTree, setLengthTree] = createSignal(lengthList(tree()))
@@ -95,6 +109,7 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
 
   onMount(() => {
     setLengthTree(lengthList(tree()))
+    setRefs(refList(tree()))
   })
 
   /******************** Caret Methods ********************/
@@ -106,18 +121,25 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
   }
 
   const getNodeCaretOn = () => {
+
+    const returnNode = (element: HTMLSpanElement) => {
+      if(element.childNodes.length === 0) element.appendChild(document.createTextNode(''))
+      return element.childNodes[0]
+    }
+
     /***  There is only one (Text)Node in ref ***/
+    const list = refList(tree())
 
     // If there is Only one Element
-    if(baseRef?.childNodes.length === 1) return refList(tree())[0]?.childNodes[0]
+    if(baseRef?.childNodes.length === 1) return returnNode(list[0]!)
+
+    // When Caret is on last
+    if(caret() >= innerText().length){
+      return returnNode(list[list.length-1]!)
+    }
 
     var textLengthTotal: number = 0
     var currentElement: HTMLSpanElement | undefined
-    const list = refList(tree())
-    // When Caret is on last
-    if(caret() === innerText().length){
-      return list[list.length-1]?.childNodes[0]
-    }
 
     var index = 0
     for(const ref of list){
@@ -130,18 +152,10 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
       index ++
     }
 
-    if(currentElement?.childNodes.length === 0) currentElement.appendChild(document.createTextNode(''))
-    return currentElement?.childNodes[0]
+    return returnNode(currentElement!)
   }
 
   const getCaretPositionOnNode = () => {
-    // StrangeMovement of ContentEditable
-    if(
-      baseRef?.childNodes.length === 1 &&
-      caret() === 0 &&
-      baseRef?.childNodes[0].nodeValue === null
-    ) return 1
-
     var previousTextLengthTotal: number = 0
     var textLengthTotal: number = 0
     var caretPosition: number = 0
@@ -189,20 +203,13 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
   /******************** handle Something Methods ********************/
 
   const innerText = () => {
-    const katexElements = baseRef!.getElementsByClassName('katex-base')
-    var text = baseRef!.innerText
+    var text = refList(tree()).map(ref => ref?.innerText).join('')
 
-    Array.from(katexElements).forEach(element => {
-      const reg = (element as HTMLSpanElement).innerText
-      text = text!.split(reg).join('')
-      console.log(text)
-      if(element.children.item(0)!.className === 'katex-error'){
-        text = text.split('$$').join('$'+reg+'$')
-      }
-    })
-
-    text = text.split('\n\n').join('')
-    text = text.split('\n').join('')
+    // If input initial letter on this textblock
+    if(text.length === 0){
+      text = baseRef!.innerText
+      if(text.length > 0) setCaret(1)
+    }
 
     return text
   }
@@ -230,9 +237,17 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
     }
 
     if(e.key === 'Backspace'){
+      if(getNodeCaretOn()?.parentElement?.innerText.length === 1){
+        e.preventDefault()
+        const newTree = removeBranch(getNodeCaretOn()?.parentElement!, tree())
+        const text = refList(newTree).map(ref => ref?.innerText).join('')
+        block_mutations('patch')(props.id, {text: text})
+        setTree(Lexer({type: 'root', content: text, children: []}))
+        setCaretPosition()
+        setLengthTree(lengthList(newTree))     
+      }
       if(getCaretPosition() === 0 && window.getSelection()?.anchorOffset === window.getSelection()?.focusOffset){
         e.preventDefault()
-        console.log(paragraph_getters('previous')(props.id))
       }
     }
 
@@ -276,6 +291,7 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
               branch={branch}
               caret={caret}
               lengthTree={lengthTree().children[index()]}
+              focus={system_getters('focus')() === props.id}
             />
           }
         </For>
