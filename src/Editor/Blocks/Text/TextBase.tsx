@@ -3,7 +3,7 @@ import { Dynamic } from "solid-js/web"
 import { ulid } from 'ulid';
 import { Lexer } from '../../../Components/TextParser';
 
-const components = import.meta.globEager('./Components/textarea/*.tsx')
+const components = import.meta.globEager('./Components/*.tsx')
 
 import BlocksStore from '../../../Store/Blocks'
 import ParagraphStore from '../../../Store/Paragraphs'
@@ -205,15 +205,15 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
     // If input initial letter on this textblock
     if(text.length === 0){
       text = baseRef!.innerText
-      if(text.length > 0) setCaret(1)
+      if(text.length > 0) setCaret(text.length)
     }
 
     return text
   }
 
   const handleInput = () => {
+    setCaretNumber()
     if(!inputting()){
-      setCaretNumber()
       block_mutations('patch')(props.id, {text: innerText()})
       setTree(Lexer({type: 'root', content: innerText(), children: []}))
       setCaretPosition()
@@ -274,12 +274,12 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
         onKeyDown={(e) => handleKeyDown(e)}
         onClick={() => handleClick()}
         onCompositionStart={() => {setInputting(true)}}
-        onCompositionEnd={() => {setInputting(false)}}
+        onCompositionEnd={() => {setInputting(false); handleInput()}}
       >
         <For each={tree().children}>
           {(branch, index) => 
             <Dynamic
-              component={components['./Components/textarea/'+branch.type+'.tsx'].default}
+              component={components['./Components/'+branch.type+'.tsx'].default}
               branch={branch}
               caret={caret}
               lengthTree={lengthTree().children[index()]}
