@@ -8,5 +8,20 @@ export default defineConfig({
     polyfillDynamicImport: false,
     outDir: 'docs'
   },
-  base: '/Editor/'
+  base: '/Editor/',
+  test: {
+    environment: 'jsdom',
+    transformMode: {
+      web: [/\.[jt]sx?$/],
+    },
+    deps: {
+      inline: [
+        /solid-js/,
+        /solid-testing-library/,
+      ],
+    },
+  },
+  resolve: {
+    conditions: ['development', 'browser'],
+  },
 });
