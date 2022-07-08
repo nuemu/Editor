@@ -34,7 +34,7 @@ const initialBlocks: Block[] = [
       "id": "01G5NWJ7P2EBTWADXT9ABQQTS7",
       "config": {
           "indent": 0,
-          "type": "Text"
+          "type": "Code"
       },
       "data": {
           "text": "GFM、ブロック単位の描画、先頭要素は即座に変換。"
