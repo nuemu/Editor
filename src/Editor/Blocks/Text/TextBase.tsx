@@ -24,7 +24,7 @@ const style: any = {
 
 const refList = (branch: Branch) => {
   var refs: (HTMLSpanElement|undefined)[] = []
-  if(branch.type === 'text' || branch.type === 'sign'){
+  if(branch.type === 'text' || branch.type === 'sign' || branch.type === 'head_sign'){
     refs.push(branch.ref)
   }
 
@@ -77,10 +77,10 @@ const lengthList = (branch: Branch, start: number = 0) => {
   return node
 }
 
-const TextBase: Component<{id: string}> = (props: {id: string}) => {
+const TextBase: Component<{id: string, paragraph_id: string}> = (props: {id: string, paragraph_id: string}) => {
   // Stores
   const { block_getters, block_mutations } = BlocksStore
-  const { paragraph_mutations } = ParagraphStore
+  const { paragraph_getters, paragraph_mutations } = ParagraphStore
   const { system_getters, system_mutations } = SystemStore
 
   // Signals
@@ -90,6 +90,8 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
   
   const [caret, setCaret] = createSignal(0)
   const [lengthTree, setLengthTree] = createSignal(lengthList(tree()))
+
+  const [waiting, setWaiting] = createSignal(false)
 
   // Non Reactive Variables
   var baseRef: HTMLDivElement|undefined = undefined
@@ -108,12 +110,31 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
     setLengthTree(lengthList(tree()))
   })
 
+  // When Focused
+  createEffect(() => {
+    if(system_getters('focus')() === props.id){
+      var caret = untrack(system_getters('caret')) as number
+      if(untrack(innerText).length! >= caret) untrack(() => setCaret(caret))
+      else untrack(() => setCaret(innerText().length!))
+      setWaiting(true)
+      untrack(() => setTree(Lexer({type: 'root', content: block_getters('get')(props.id).data.text, children: []})))
+    }
+  })
+
+  // After Focused
+  createEffect(() => {
+    if(waiting()){
+      untrack(setCaretPosition)
+      setWaiting(false)
+    }
+  })
+
   /******************** Caret Methods ********************/
 
   const setCaretNumber = (diff?: number) => {
     const caretPosition = diff ? getCaretPosition() + diff : getCaretPosition()
+    system_mutations('setCaret')(caretPosition)
     setCaret(caretPosition)
-    system_mutations('patchCaretPosition')(caretPosition)
   }
 
   const getNodeCaretOn = () => {
@@ -125,9 +146,6 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
 
     /***  There is only one (Text)Node in ref ***/
     const list = refList(tree())
-
-    // If there is Only one Element
-    if(baseRef?.childNodes.length === 1) return returnNode(list[0]!)
 
     // When Caret is on last
     if(caret() >= innerText().length){
@@ -222,25 +240,36 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if(e.key === 'Enter' && e.keyCode !== 229){
+    if(e.key === 'Enter' && !inputting()){
       e.preventDefault()
       const id = ulid()
       if(caret() !== innerText().length){
         block_mutations('add')(id, 'Text', innerText().substring(caret()))
-        block_mutations('patch')(props.id, {text: innerText().substring(0, caret())})
+        block_mutations('patchData')(props.id, {text: innerText().substring(0, caret())})
         setTree(Lexer({type: 'root', content: innerText().substring(0, caret()), children: []}))
         setCaretPosition()
       }
       else block_mutations('add')(id, 'Text')
       paragraph_mutations('add')("01G5KAR1FY949SY0R2DV4RGR7M", props.id, id)
+      system_mutations('setCaret')(0)
+      system_mutations('setFocus')(id)
     }
 
     if(e.key === 'Backspace'){
       if(getCaretPosition() === 0 && window.getSelection()?.anchorOffset === window.getSelection()?.focusOffset){
         e.preventDefault()
+        const prev = paragraph_getters('prev')(props.paragraph_id, props.id)
+        if(prev !== props.id){
+          const newData = block_getters('get')(prev).data
+          system_mutations('setCaret')(newData.text.length)
+          newData.text += innerText()
+          block_mutations('patchData')(prev, newData)
+          paragraph_mutations('remove')(props.paragraph_id, props.id)
+          system_mutations('setFocus')(prev)
+        }
       }
     }
-
+        
     if(e.key === 'ArrowLeft'){
       if(getCaretPosition() > 0) setCaretNumber(-1)
     }
@@ -250,11 +279,15 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
     }
 
     if(e.key === 'ArrowUp'){
-      
+      e.preventDefault()
+      system_mutations('setCaret')(getCaretPosition())
+      system_mutations('setFocus')(paragraph_getters('prev')(props.paragraph_id, props.id))
     }
 
     if(e.key === 'ArrowDown'){
-
+      e.preventDefault()
+      system_mutations('setCaret')(getCaretPosition())
+      system_mutations('setFocus')(paragraph_getters('next')(props.paragraph_id, props.id))
     }
   }
 
@@ -269,7 +302,7 @@ const TextBase: Component<{id: string}> = (props: {id: string}) => {
         contentEditable
         class="text-block-textarea"
         style={style.textarea}
-        onFocus={() => system_mutations('patchFocus')(props.id)}
+        onFocus={() => system_mutations('setFocus')(props.id)}
         onInput={() => handleInput()}
         onKeyDown={(e) => handleKeyDown(e)}
         onClick={() => handleClick()}

@@ -14,7 +14,7 @@ type Block = {
   data: any
 }
 
-const Base: Component<{id: string}> = (props: {id: string}) => {
+const Base: Component<{id: string, paragraph_id: string}> = (props: {id: string, paragraph_id: string}) => {
   const {block_getters} = BlocksStore
   const block = createMemo((prev: Block) => {
     if(prev){
@@ -25,7 +25,7 @@ const Base: Component<{id: string}> = (props: {id: string}) => {
   })
 
   return (
-    <Dynamic component={Blocks['./'+block().config.type+'/'+block().config.type+'Base.tsx'].default} id={props.id} />
+    <Dynamic component={Blocks['./'+block().config.type+'/'+block().config.type+'Base.tsx'].default} id={props.id} paragraph_id={props.paragraph_id}/>
   )
 }
 

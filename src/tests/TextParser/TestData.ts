@@ -28,11 +28,6 @@ export const url = {
     content: '[url1](url2) text',
     children: [
       {
-        type: 'text',
-        content: '',
-        children: []
-      },
-      {
         type: 'url',
         content: 'url1',
         additional_content: 'url2',
@@ -75,11 +70,6 @@ export const emphasis = {
     type: 'root',
     content: '**emphasis** text',
     children: [
-      {
-        type: 'text',
-        content: '',
-        children: []
-      },
       {
         type: 'emphasis',
         content: 'emphasis',

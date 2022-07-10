@@ -1,4 +1,4 @@
-interface params {
+type inline_signs = {
   [key: string]: {
     reg: string
     type: string
@@ -8,7 +8,15 @@ interface params {
   }
 }
 
-const inline_signs: params = {
+type head_signs = {
+  [key: string]: {
+    reg: string
+    type: string
+    sign: string
+  }
+}
+
+const inline_signs: inline_signs = {
   '**': {
     reg: '\\*{2,2}(.+?)\\*{2,2}',
     type: 'emphasis',
@@ -34,6 +42,29 @@ const inline_signs: params = {
     middle_sign: '](',
     end_sign: ')',
   },
+}
+
+const head_signs: head_signs = {
+  '### ': {
+    reg: '### ',
+    type: 'h3',
+    sign: '### '
+  },
+  '## ': {
+    reg: '## ',
+    type: 'h2',
+    sign: '## ',
+  },
+  '# ': {
+    reg: '# ',
+    type: 'h1',
+    sign: '# '
+  },
+  '- ': {
+    reg: '- ',
+    type: 'list',
+    sign: '- '
+  }
 }
 
 const generateChildren = (sentence: string, signs?:{start?: string, middle?: string, end?: string}) => {
@@ -64,7 +95,7 @@ const generateChildren = (sentence: string, signs?:{start?: string, middle?: str
       end_sign: inline_signs[regSign].end_sign,
       children: []
     }
-    children.push({type: 'text', content: split[0], children: []})
+    if(split[0] !== '') children.push({type: 'text', content: split[0], children: []})
     
     if(inline_signs[regSign].type !== 'url' && inline_signs[regSign].type !== 'image'){
       children.push(newChild)
@@ -88,10 +119,14 @@ const generateChildren = (sentence: string, signs?:{start?: string, middle?: str
 }
 
 export const Lexer = (branch: Branch) => {
-  var children: Branch[]
+  var children: Branch[] = []
 
-  if(branch.start_sign) children = generateChildren(branch.content, {start: branch.start_sign, end: branch.end_sign})
-  else children = generateChildren(branch.content)
+  if(branch.type === 'root'){
+    children = headParser(branch)
+  }
+
+  if(branch.start_sign) children = children.concat(generateChildren(branch.content, {start: branch.start_sign, end: branch.end_sign}))
+  else children = children.concat(generateChildren(branch.content))
 
   branch.children = children
 
@@ -100,4 +135,17 @@ export const Lexer = (branch: Branch) => {
   })
 
   return branch
+}
+
+const headParser = (branch: Branch) => {
+  var children: Branch[] = []
+  Object.keys(head_signs).forEach(key => {
+    const reg = new RegExp('^'+key)
+    if(reg.test(branch.content)){
+      branch.content = branch.content.split(reg)[1]
+      children.push({type: 'head_sign', content: head_signs[key].sign, children: []})
+    }
+  })
+
+  return children
 }

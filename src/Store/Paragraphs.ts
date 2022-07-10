@@ -30,8 +30,24 @@ const getterMethods = (key: string, paragraphs: Paragraph[]) => {
     return paragraphs.find(paragraph => paragraph.id === id)
   };
 
+  const getNextBlock = (paragraph_id: string, block_id: string) => {
+    const paragraph = paragraphs.find(paragraph => paragraph.id === paragraph_id)
+    const index = paragraph?.blocks.findIndex(id => id === block_id)
+    if(index! < paragraph!.blocks.length) return paragraph!.blocks[index!+1]
+    else return paragraph!.blocks[index!]
+  }
+
+  const getPreviousBlock = (paragraph_id: string, block_id: string) => {
+    const paragraph = paragraphs.find(paragraph => paragraph.id === paragraph_id)
+    const index = paragraph?.blocks.findIndex(id => id === block_id)
+    if(index !== 0) return paragraph!.blocks[index!-1]
+    else return paragraph!.blocks[index!]
+  }
+
   const getters: actions = {
     get: getParagraph,
+    prev: getPreviousBlock,
+    next: getNextBlock
   }
 
   return getters[key]
@@ -48,8 +64,19 @@ const mutationMethods = (key: string, setStore: any) => {
     );
   };
 
+  const removeBlock = (id: string, blockId: string) => {
+    setStore(
+      (paragraph:Paragraph) => paragraph.id === id,
+      produce((paragraph:Paragraph) => {
+        const index = paragraph.blocks.findIndex(block => block === blockId)
+        paragraph.blocks.splice(index, 1)
+      })
+    );
+  }
+
   const mutations: actions = {
-    add: addBlock
+    add: addBlock,
+    remove: removeBlock,
   };
 
   return mutations[key]

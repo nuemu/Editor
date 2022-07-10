@@ -11,7 +11,7 @@ const Paragraph: Component = () => {
   
   return (
     <For each={paragraph().blocks}>{(id: string, index) =>
-      <BlockBase id={id} />}
+      <BlockBase id={id} paragraph_id={"01G5KAR1FY949SY0R2DV4RGR7M"}/>}
     </For>
   )
 }
