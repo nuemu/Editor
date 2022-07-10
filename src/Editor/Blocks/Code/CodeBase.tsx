@@ -1,7 +1,7 @@
 import { Component, createEffect, createMemo, createResource, createSignal } from "solid-js"
 
 import * as shiki from 'shiki'
-shiki.setCDN("/node_modules/shiki/");
+shiki.setCDN('https://unpkg.com/shiki/')
 
 const generateHighlighter = async () => {
   return await shiki.getHighlighter({
