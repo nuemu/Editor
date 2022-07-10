@@ -10,6 +10,7 @@ export default defineConfig({
   },
   base: '/Editor/',
   test: {
+    globals: true,
     environment: 'jsdom',
     transformMode: {
       web: [/\.[jt]sx?$/],
@@ -19,6 +20,9 @@ export default defineConfig({
         /solid-js/,
         /solid-testing-library/,
       ],
+    },
+    coverage: {
+      reporter: ['text', 'json', 'html'],
     },
   },
   resolve: {

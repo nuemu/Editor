@@ -232,7 +232,7 @@ const TextBase: Component<{id: string, paragraph_id: string}> = (props: {id: str
   const handleInput = () => {
     setCaretNumber()
     if(!inputting()){
-      block_mutations('patch')(props.id, {text: innerText()})
+      block_mutations('patchData')(props.id, {text: innerText()})
       setTree(Lexer({type: 'root', content: innerText(), children: []}))
       setCaretPosition()
       setLengthTree(lengthList(tree()))
