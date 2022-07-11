@@ -27,7 +27,7 @@ const initialBlocks: Block[] = [
           "type": "Text"
       },
       "data": {
-          "text": "Block Style Editor"
+          "text": "Caretが装飾文字の上にいくと、Markdown記法で表示され修正できる"
       }
   },
   {
@@ -47,7 +47,7 @@ const initialBlocks: Block[] = [
           "type": "Text"
       },
       "data": {
-          "text": "とりあえずで**強調**、~~打ち消し~~、[URL](/)を実装、imageについては思案中。また、**記号のネストは~~不~~可能**。"
+          "text": "インライン要素として、現状は**強調**、~~打ち消し~~、[URL](/Editor)、数式ブロック$\\sum_{n=0}^\\infty$を実装。**記号の[ネストも~~不~~可](/Editor)能**。なお、**のように閉じていない記号は無視される。"
       }
   },
   {
@@ -57,7 +57,7 @@ const initialBlocks: Block[] = [
           "type": "Text"
       },
       "data": {
-        "text": "数式ブロック$\\sum_{n=0}^\\infty$は現在作成中"
+        "text": "ディスプレイ要素？として、h1~h3は実装。"
       }
   },
   {
@@ -67,17 +67,17 @@ const initialBlocks: Block[] = [
           "type": "Text"
       },
       "data": {
-          "text": "使ってないのでわからないが、[Typora風？](https://typora.io/)にしている。Caretが装飾文字の上にいくと、Markdown記法で表示され修正できる"
+          "text": "[Typora(使ったことがない...)](https://typora.io/)と[Notion](https://www.notion.so/)を参考にしている。"
       }
   },
   {
       "id": "01G5PB8HYVNE8YQ527PZSXD94A",
       "config": {
           "indent": 0,
-          "type": "Text"
+          "type": "H1"
       },
       "data": {
-          "text": "**鋭意開発中**"
+          "text": "# 鋭意開発中"
       }
   },
   {
@@ -87,7 +87,7 @@ const initialBlocks: Block[] = [
           "type": "Text"
       },
       "data": {
-          "text": "なお、**のように閉じていない記号は無視される。"
+          "text": ""
       }
   }
 ]

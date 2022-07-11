@@ -64,16 +64,6 @@ const head_signs: head_signs = {
     type: 'H1',
     sign: '# '
   },
-  '- ': {
-    reg: '- ',
-    type: 'List',
-    sign: '- '
-  },
-  '$$ ': {
-    reg: '\\${2,2} ',
-    type: 'equation',
-    sign: '$$ '
-  }
 }
 
 const generateChildren = (sentence: string, signs?:{start?: string, middle?: string, end?: string}) => {

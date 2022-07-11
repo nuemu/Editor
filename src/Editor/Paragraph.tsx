@@ -14,7 +14,7 @@ const Paragraph: Component = () => {
   
   createEffect(() => {
     const block_types = paragraph().blocks.map((id: string) => block_getters('get')(id).config.type)
-    console.log(block_types)
+    //console.log(block_types)
   })
   
   return (
