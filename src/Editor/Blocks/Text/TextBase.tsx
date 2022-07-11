@@ -77,7 +77,7 @@ const lengthList = (branch: Branch, start: number = 0) => {
   return node
 }
 
-const TextBase: Component<{id: string, paragraph_id: string}> = (props: {id: string, paragraph_id: string}) => {
+const TextBase: Component<BlockBaseProps> = (props: BlockBaseProps) => {
   // Stores
   const { block_getters, block_mutations } = BlocksStore
   const { paragraph_getters, paragraph_mutations } = ParagraphStore
@@ -85,7 +85,7 @@ const TextBase: Component<{id: string, paragraph_id: string}> = (props: {id: str
 
   // Signals
   const block = createMemo(() => block_getters('get')(props.id))
-  const [tree, setTree] = createSignal(Lexer({type: 'root', content: block().data.text, children: []}))
+  const [tree, setTree] = createSignal(Lexer({type: 'root', content: block().data.text, children: []}, props.id))
   const [inputting, setInputting] = createSignal(false)
   
   const [caret, setCaret] = createSignal(0)
@@ -117,7 +117,7 @@ const TextBase: Component<{id: string, paragraph_id: string}> = (props: {id: str
       if(untrack(innerText).length! >= caret) untrack(() => setCaret(caret))
       else untrack(() => setCaret(innerText().length!))
       setWaiting(true)
-      untrack(() => setTree(Lexer({type: 'root', content: block_getters('get')(props.id).data.text, children: []})))
+      untrack(() => setTree(Lexer({type: 'root', content: block_getters('get')(props.id).data.text, children: []}, props.id)))
     }
   })
 
@@ -233,9 +233,21 @@ const TextBase: Component<{id: string, paragraph_id: string}> = (props: {id: str
     setCaretNumber()
     if(!inputting()){
       block_mutations('patchData')(props.id, {text: innerText()})
-      setTree(Lexer({type: 'root', content: innerText(), children: []}))
-      setCaretPosition()
-      setLengthTree(lengthList(tree()))
+      const newTree = Lexer({type: 'root', content: innerText(), children: []}, props.id)
+      if(newTree.children[0].type === 'head_sign'){
+        if(block().config.type === newTree.children[0].additional_content){
+          setTree(newTree)
+          setCaretPosition()
+          setLengthTree(lengthList(tree()))
+        }
+      }
+      else{
+        if(block().config.type === newTree.children[0].additional_content){
+          setTree(newTree)
+          setCaretPosition()
+          setLengthTree(lengthList(tree()))
+        }
+      }
     }
   }
 
@@ -246,7 +258,7 @@ const TextBase: Component<{id: string, paragraph_id: string}> = (props: {id: str
       if(caret() !== innerText().length){
         block_mutations('add')(id, 'Text', innerText().substring(caret()))
         block_mutations('patchData')(props.id, {text: innerText().substring(0, caret())})
-        setTree(Lexer({type: 'root', content: innerText().substring(0, caret()), children: []}))
+        setTree(Lexer({type: 'root', content: innerText().substring(0, caret()), children: []}, props.id))
         setCaretPosition()
       }
       else block_mutations('add')(id, 'Text')

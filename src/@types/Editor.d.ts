@@ -10,6 +10,11 @@ type Branch = {
 }
 
 // caret ~ visible Accessor<T> not working ?
+type BlockBaseProps = {
+  id: string,
+  paragraph_id: string
+}
+
 type TextBlockProps = {
   branch: Branch,
   caret: any,
