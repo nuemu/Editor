@@ -77,7 +77,7 @@ const lengthList = (branch: Branch, start: number = 0) => {
   return node
 }
 
-const TextBase: Component<BlockBaseProps> = (props: BlockBaseProps) => {
+const CodeTextBase: Component<BlockBaseProps> = (props: BlockBaseProps) => {
   // Stores
   const { block_getters, block_mutations } = BlocksStore
   const { paragraph_getters, paragraph_mutations } = ParagraphStore
@@ -342,4 +342,4 @@ const TextBase: Component<BlockBaseProps> = (props: BlockBaseProps) => {
   )
 }
 
-export default TextBase
+export default CodeTextBase

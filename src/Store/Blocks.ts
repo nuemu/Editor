@@ -37,7 +37,7 @@ const initialBlocks: Block[] = [
           "type": "Code"
       },
       "data": {
-          "text": "GFM、ブロック単位の描画、先頭要素は即座に変換。"
+          "text": "```"
       }
   },
   {
@@ -57,7 +57,7 @@ const initialBlocks: Block[] = [
           "type": "Text"
       },
       "data": {
-        "text": "ディスプレイ要素？として、h1~h3は実装。"
+        "text": "ディスプレイ要素？として、h1~h3は実装。これはCodeブロックだが、Syntax Highlightはまだ準備されてない。"
       }
   },
   {
@@ -84,10 +84,10 @@ const initialBlocks: Block[] = [
       "id": "01G5PB8R161RT048NVJQPKKQVK",
       "config": {
           "indent": 0,
-          "type": "Text"
+          "type": "Code"
       },
       "data": {
-          "text": ""
+          "text": "```"
       }
   }
 ]

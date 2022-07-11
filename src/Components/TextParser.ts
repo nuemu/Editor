@@ -64,6 +64,11 @@ const head_signs: head_signs = {
     type: 'H1',
     sign: '# '
   },
+  '```': {
+    reg: '```(.+)',
+    type: 'Code',
+    sign: '```'
+  }
 }
 
 const generateChildren = (sentence: string, signs?:{start?: string, middle?: string, end?: string}) => {
