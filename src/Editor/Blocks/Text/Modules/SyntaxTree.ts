@@ -21,10 +21,22 @@ export default class SyntaxTree {
     this.setSyntaxTree(Parser({type: 'root', content: text, children: []}))
   }
 
+  innerText = (baseRef: HTMLDivElement) => {
+    const newRefs = this.refs().filter(ref => document.contains((ref as Node)))
+    var text = newRefs.map(ref => ref?.innerText).join('')
+
+    // If input initial letter on this textblock
+    if(text.length === 0){
+      text = baseRef!.innerText
+    }
+
+    return text
+  }
+
   private extractRefs = (branch: Branch) => {
-    var refs: (HTMLSpanElement|undefined)[] = []
+    var refs: HTMLSpanElement[] = []
     if(branch.type === 'text' || branch.type === 'sign' || branch.type === 'head_sign'){
-      refs.push(branch.ref)
+      refs.push(branch.ref!)
     }
   
     if(branch.children.length > 0){
