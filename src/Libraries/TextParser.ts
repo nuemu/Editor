@@ -1,7 +1,3 @@
-import BlocksStore from '../Store/Blocks'
-
-const { block_getters, block_mutations } = BlocksStore
-
 type inline_signs = {
   [key: string]: {
     reg: string
@@ -122,11 +118,11 @@ const generateChildren = (sentence: string, signs?:{start?: string, middle?: str
   return children
 }
 
-export const Lexer = (branch: Branch, id?: string) => {
+export const Parser = (branch: Branch) => {
   var children: Branch[] = []
 
-  if(branch.type === 'root' && id){
-    children = headParser(branch, id!)
+  if(branch.type === 'root'){
+    children = headParser(branch)
   }
 
   if(branch.start_sign) children = children.concat(generateChildren(branch.content, {start: branch.start_sign, end: branch.end_sign}))
@@ -135,30 +131,22 @@ export const Lexer = (branch: Branch, id?: string) => {
   branch.children = children
 
   children.forEach(child => {
-    if(child.type !== 'text' && child.type !== 'sign') Lexer(child)
+    if(child.type !== 'text' && child.type !== 'sign') Parser(child)
   })
 
   return branch
 }
 
-const headParser = (branch: Branch, id: string) => {
+const headParser = (branch: Branch) => {
   var children: Branch[] = []
-  const block = JSON.parse(JSON.stringify(block_getters('get')(id)))
-
+  
   Object.keys(head_signs).forEach(key => {
     const reg = new RegExp('^'+key)
     if(reg.test(branch.content)){
       branch.content = branch.content.split(reg)[1]
       children.push({type: 'head_sign', content: head_signs[key].sign, additional_content: head_signs[key].type, children: []})
-
-      block.config.type = head_signs[key].type
-      block_mutations('patch')(id, block)
     }
   })
-  if(children.length === 0){
-    block.config.type = 'Text'
-    block_mutations('patch')(id, block)
-  }
 
   return children
 }

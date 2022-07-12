@@ -84,7 +84,7 @@ const initialBlocks: Block[] = [
       "id": "01G5PB8R161RT048NVJQPKKQVK",
       "config": {
           "indent": 0,
-          "type": "Code"
+          "type": "Text"
       },
       "data": {
           "text": "```"

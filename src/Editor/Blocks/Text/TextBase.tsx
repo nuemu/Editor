@@ -1,13 +1,15 @@
 import { Component, createSignal, createMemo, onMount, Show, createEffect, untrack, For } from 'solid-js';
 import { Dynamic } from "solid-js/web"
 import { ulid } from 'ulid';
-import { Lexer } from '../../../Components/TextParser';
+import { Parser } from '../../../Libraries/TextParser';
 
 const components = import.meta.globEager('./Components/*.tsx')
 
 import BlocksStore from '../../../Store/Blocks'
 import ParagraphStore from '../../../Store/Paragraphs'
 import SystemStore from '../../../Store/System'
+
+import SyntaxTree from './Modules/SyntaxTree'
 
 const style: any = {
   base:{
@@ -20,34 +22,6 @@ const style: any = {
     position: 'relative',
     zIndex: '1',
   }
-}
-
-const refList = (branch: Branch) => {
-  var refs: (HTMLSpanElement|undefined)[] = []
-  if(branch.type === 'text' || branch.type === 'sign' || branch.type === 'head_sign'){
-    refs.push(branch.ref)
-  }
-
-  if(branch.children.length > 0){
-    branch.children.forEach(child => {
-      refs = refs.concat(refList(child))
-    })
-  }
-
-  return refs
-}
-
-const removeBranch = (ref: HTMLSpanElement | undefined, branch: Branch) => {
-  if(branch.children.length > 0){
-    branch.children.forEach((child, index: number) => {
-      if(child.ref === ref){
-        branch.children.splice(index, 1)
-      }
-      else removeBranch(ref, child)
-    })
-  }
-
-  return branch
 }
 
 type lengthTree = {
@@ -85,11 +59,11 @@ const TextBase: Component<BlockBaseProps> = (props: BlockBaseProps) => {
 
   // Signals
   const block = createMemo(() => block_getters('get')(props.id))
-  const [tree, setTree] = createSignal(Lexer({type: 'root', content: block().data.text, children: []}, props.id))
+  const syntax = new SyntaxTree(block().data.text)
   const [inputting, setInputting] = createSignal(false)
   
   const [caret, setCaret] = createSignal(0)
-  const [lengthTree, setLengthTree] = createSignal(lengthList(tree()))
+  const [lengthTree, setLengthTree] = createSignal(lengthList(syntax.tree()))
 
   const [waiting, setWaiting] = createSignal(false)
 
@@ -98,7 +72,7 @@ const TextBase: Component<BlockBaseProps> = (props: BlockBaseProps) => {
 
   // Clean Up DOM
   createEffect(() => {
-    tree()
+    syntax.tree()
     baseRef!.childNodes.forEach(child => {
       if(child.nodeName.includes('BR')) baseRef?.removeChild(child)
       if(child.nodeType === 3) baseRef?.removeChild(child)
@@ -107,7 +81,7 @@ const TextBase: Component<BlockBaseProps> = (props: BlockBaseProps) => {
 
   // Gen lengthTree after mount
   onMount(() => {
-    setLengthTree(lengthList(tree()))
+    setLengthTree(lengthList(syntax.tree()))
   })
 
   // When Focused
@@ -117,7 +91,6 @@ const TextBase: Component<BlockBaseProps> = (props: BlockBaseProps) => {
       if(untrack(innerText).length! >= caret) untrack(() => setCaret(caret))
       else untrack(() => setCaret(innerText().length!))
       setWaiting(true)
-      untrack(() => setTree(Lexer({type: 'root', content: block_getters('get')(props.id).data.text, children: []}, props.id)))
     }
   })
 
@@ -148,7 +121,7 @@ const TextBase: Component<BlockBaseProps> = (props: BlockBaseProps) => {
     }
 
     /***  There is only one (Text)Node in ref ***/
-    const list = refList(tree())
+    const list = syntax.refs()
 
     // When Caret is on last
     if(caret() >= innerText().length){
@@ -176,7 +149,7 @@ const TextBase: Component<BlockBaseProps> = (props: BlockBaseProps) => {
     var previousTextLengthTotal: number = 0
     var textLengthTotal: number = 0
     var caretPosition: number = 0
-    const list = refList(tree())
+    const list = syntax.refs()
     for(const ref of list){
       textLengthTotal += ref?.innerText.length || 0
       if(textLengthTotal > caret()){
@@ -208,7 +181,7 @@ const TextBase: Component<BlockBaseProps> = (props: BlockBaseProps) => {
     var textLength: number = 0
     var caretPosition: number = 0
 
-    refList(tree()).forEach(ref => {
+    syntax.refs().forEach(ref => {
       if(selection?.anchorNode?.parentElement === ref){
         // When delete only one letter, insert '\n' ... (Content Editable ?)
         caretPosition = textLength + (selection?.anchorNode?.nodeValue === '\n' ? 0 : selection?.anchorOffset || 0)
@@ -222,7 +195,7 @@ const TextBase: Component<BlockBaseProps> = (props: BlockBaseProps) => {
   /******************** handle Something Methods ********************/
 
   const innerText = () => {
-    const newRefs = refList(tree()).filter(ref => document.contains((ref as Node)))
+    const newRefs = syntax.refs().filter(ref => document.contains((ref as Node)))
     var text = newRefs.map(ref => ref?.innerText).join('')
 
     // If input initial letter on this textblock
@@ -238,19 +211,19 @@ const TextBase: Component<BlockBaseProps> = (props: BlockBaseProps) => {
     setCaretNumber()
     if(!inputting()){
       block_mutations('patchData')(props.id, {text: innerText()})
-      const newTree = Lexer({type: 'root', content: innerText(), children: []}, props.id)
+      const newTree = Parser({type: 'root', content: innerText(), children: []})
       if(newTree.children[0].type === 'head_sign'){
         if(block().config.type === newTree.children[0].additional_content){
-          setTree(newTree)
+          syntax.parse(innerText())
           setCaretPosition()
-          setLengthTree(lengthList(tree()))
+          setLengthTree(lengthList(syntax.tree()))
         }
       }
       else{
         if(block().config.type === 'Text'){
-          setTree(newTree)
+          syntax.parse(innerText())
           setCaretPosition()
-          setLengthTree(lengthList(tree()))
+          setLengthTree(lengthList(syntax.tree()))
         }
       }
     }
@@ -263,7 +236,7 @@ const TextBase: Component<BlockBaseProps> = (props: BlockBaseProps) => {
       if(caret() !== innerText().length){
         block_mutations('add')(id, 'Text', innerText().substring(caret()))
         block_mutations('patchData')(props.id, {text: innerText().substring(0, caret())})
-        setTree(Lexer({type: 'root', content: innerText().substring(0, caret()), children: []}, props.id))
+        syntax.parse(innerText().substring(0, caret()))
         setCaretPosition()
       }
       else block_mutations('add')(id, 'Text')
@@ -326,7 +299,7 @@ const TextBase: Component<BlockBaseProps> = (props: BlockBaseProps) => {
         onCompositionStart={() => {setInputting(true)}}
         onCompositionEnd={() => {setInputting(false); handleInput()}}
       >
-        <For each={tree().children}>
+        <For each={syntax.tree().children}>
           {(branch, index) => 
             <Dynamic
               component={components['./Components/'+branch.type+'.tsx'].default}

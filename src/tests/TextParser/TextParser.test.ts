@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { Lexer } from '../../Components/TextParser';
+import { Lexer } from '../../Libraries/TextParser';
 import { emphasis, normal, url } from './TestData';
 
 describe('Text Parse Normal', () => {
