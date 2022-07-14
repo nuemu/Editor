@@ -1,4 +1,4 @@
-import { Parser } from "../../Libraries/TextParser"
+import { Parser } from "../../Utils/TextParser"
 import { Accessor, children, createSignal, Setter } from "solid-js"
 
 type lengthTree = {
@@ -32,12 +32,21 @@ export default class Node {
     return this.list()!.map(node => node?.innerText).join('')
   }
 
-  private generateTree = (branch: Branch, tree?: nodeTree) => {
-    if(!tree) tree = {type: 'root', content: 'root', children: []}
+  private generateTree = (branch: SyntaxTree, start: number = 0, tree: nodeTree = {type: 'root', content: 'root', children: []}) => {
+    const nodeLength = (node: SyntaxTree) => {
+      if(node.start_sign) return node.start_sign.length + node.content.length + node.end_sign!.length
+      return node.content.length
+    }
+
+    tree.start = start
+    tree.end = start + nodeLength(branch)
+    
     if(branch.children.length === 0) tree.ref = undefined
     else{
-      tree.children = branch.children.map(child => {
-        return this.generateTree(child, {type: child.type, content: child.content, children: []})
+      var newStart = start ? start : 0
+      tree.children = branch.children.map((child, index) => {
+        newStart += (index > 0 ? nodeLength(branch.children[index-1]) : 0)
+        return this.generateTree(child, newStart, {type: child.type, content: child.content, children: []})
       })
     }
 
@@ -55,8 +64,8 @@ export default class Node {
     return list
   }
 
-  private generateLengthTree = (branch: Branch, start: number = 0) => {
-    const nodeLength = (node: Branch) => {
+  private generateLengthTree = (branch: SyntaxTree, start: number = 0) => {
+    const nodeLength = (node: SyntaxTree) => {
       if(node.start_sign) return node.start_sign.length + node.content.length + node.end_sign!.length
       return node.content.length
     }

@@ -8,14 +8,14 @@ const Blocks = import.meta.globEager('./Blocks/*/*Base.tsx');
 
 const Paragraph: Component = () => {
   const { block_getters } = BlocksStore
-  const { paragraph_getters } = ParagraphStore
+  const { paragraphs } = ParagraphStore
 
-  const [blocks, setBlocks] = createSignal(paragraph_getters('get')("01G5KAR1FY949SY0R2DV4RGR7M").blocks.map((id: string) => {return {id: id, type: block_getters('get')(id).config.type}}))
+  const [blocks, setBlocks] = createSignal(paragraphs.get("01G5KAR1FY949SY0R2DV4RGR7M")!.blocks.map((id: string) => {return {id: id, type: block_getters('get')(id).config.type}}))
 
   createEffect(() => {
-    const news = paragraph_getters('get')("01G5KAR1FY949SY0R2DV4RGR7M").blocks.map((id: string) => block_getters('get')(id).config.type)
+    const news = paragraphs.get("01G5KAR1FY949SY0R2DV4RGR7M")!.blocks.map((id: string) => block_getters('get')(id).config.type)
     if(JSON.stringify(news) !== JSON.stringify(blocks().map((block: {id: string, type: string}) => block.type))){
-      setBlocks(paragraph_getters('get')("01G5KAR1FY949SY0R2DV4RGR7M").blocks.map((id: string) => {return {id: id, type: block_getters('get')(id).config.type}}))
+      setBlocks(paragraphs.get("01G5KAR1FY949SY0R2DV4RGR7M")!.blocks.map((id: string) => {return {id: id, type: block_getters('get')(id).config.type}}))
     }
   })
 
@@ -71,7 +71,7 @@ const Paragraph: Component = () => {
           <Match when={blocks[0].type !== 'CodeText'}>
             <For each={blocks}>
               {(block: {id: string, type: string}) => 
-                <Dynamic component={Blocks['./Blocks/'+block.type+'/'+block.type+'Base.tsx'].default} id={block.id} paragraph_id={"01G5KAR1FY949SY0R2DV4RGR7M"}/>
+                <Dynamic component={Blocks['./Blocks/'+block.type+'/Base.tsx'].default} id={block.id} paragraph_id={"01G5KAR1FY949SY0R2DV4RGR7M"}/>
               }
             </For>
           </Match>
@@ -79,7 +79,7 @@ const Paragraph: Component = () => {
             <pre><code>
             <For each={blocks}>
               {(block: {id: string, type: string}) => 
-                <Dynamic component={Blocks['./Blocks/'+block.type+'/'+block.type+'Base.tsx'].default} id={block.id} paragraph_id={"01G5KAR1FY949SY0R2DV4RGR7M"}/>
+                <Dynamic component={Blocks['./Blocks/'+block.type+'/Base.tsx'].default} id={block.id} paragraph_id={"01G5KAR1FY949SY0R2DV4RGR7M"}/>
               }
             </For>
             </code></pre>

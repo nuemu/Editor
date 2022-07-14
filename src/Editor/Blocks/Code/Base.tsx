@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal } from "solid-js"
 
-import Text from "../Text/TextBase"
+import Text from "../Text/Base"
 import Systems from '../../../Store/System'
 
 const style = {

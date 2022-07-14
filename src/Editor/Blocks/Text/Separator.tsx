@@ -7,9 +7,9 @@ const Separator: Component<TextBlockProps> = (props: TextBlockProps) => {
     <For each={props.node.children}>
       {(node) => {
         if(node.type !== 'text' && node.type !== 'sign' && node.type !== 'head_sign'){
-          return <Wrapper node={node} caret={props.caret}/>
+          return <Wrapper node={node} caret={props.caret} focusing={props.focusing} caret_on={props.caret_on} />
         }
-        else return <Textarea node={node} caret={props.caret}/>
+        else return <Textarea node={node} caret={props.caret} focusing={props.focusing} caret_on={props.caret_on} />
       }}
     </For>)
 }

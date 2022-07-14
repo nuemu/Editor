@@ -21,41 +21,33 @@ const initialParagraphs: Paragraph[] = [
   ]}
 ]
 
-type actions = {
-  [key: string]: any
-}
+class Paragraphs {
+  paragraphs: Paragraph[]
+  setParagraphs: any
+  constructor(paragraphs: Paragraph[]){
+    [this.paragraphs, this.setParagraphs] = createStore(paragraphs)
+  }
 
-const getterMethods = (key: string, paragraphs: Paragraph[]) => {
-  const getParagraph = (id: string) => {
-    return paragraphs.find(paragraph => paragraph.id === id)
-  };
+  get = (id: string) => {
+    return this.paragraphs.find(paragraph => paragraph.id === id)
+  }
 
-  const getNextBlock = (paragraph_id: string, block_id: string) => {
-    const paragraph = paragraphs.find(paragraph => paragraph.id === paragraph_id)
+  next = (paragraph_id: string, block_id: string) => {
+    const paragraph = this.paragraphs.find(paragraph => paragraph.id === paragraph_id)
     const index = paragraph?.blocks.findIndex(id => id === block_id)
     if(index! < paragraph!.blocks.length) return paragraph!.blocks[index!+1]
     else return paragraph!.blocks[index!]
   }
 
-  const getPreviousBlock = (paragraph_id: string, block_id: string) => {
-    const paragraph = paragraphs.find(paragraph => paragraph.id === paragraph_id)
+  prev = (paragraph_id: string, block_id: string) => {
+    const paragraph = this.paragraphs.find(paragraph => paragraph.id === paragraph_id)
     const index = paragraph?.blocks.findIndex(id => id === block_id)
     if(index !== 0) return paragraph!.blocks[index!-1]
     else return paragraph!.blocks[index!]
   }
 
-  const getters: actions = {
-    get: getParagraph,
-    prev: getPreviousBlock,
-    next: getNextBlock
-  }
-
-  return getters[key]
-}
-
-const mutationMethods = (key: string, setStore: any) => {
-  const addBlock = (id: string, blockId: string, newBlockId: string) => {
-    setStore(
+  addBlock = (id: string, blockId: string, newBlockId: string) => {
+    this.setParagraphs(
       (paragraph:Paragraph) => paragraph.id === id,
       produce((paragraph:Paragraph) => {
         const index = paragraph.blocks.findIndex(block => block === blockId)
@@ -64,8 +56,8 @@ const mutationMethods = (key: string, setStore: any) => {
     );
   };
 
-  const removeBlock = (id: string, blockId: string) => {
-    setStore(
+  removeBlock = (id: string, blockId: string) => {
+    this.setParagraphs(
       (paragraph:Paragraph) => paragraph.id === id,
       produce((paragraph:Paragraph) => {
         const index = paragraph.blocks.findIndex(block => block === blockId)
@@ -73,27 +65,12 @@ const mutationMethods = (key: string, setStore: any) => {
       })
     );
   }
-
-  const mutations: actions = {
-    add: addBlock,
-    remove: removeBlock,
-  };
-
-  return mutations[key]
 }
 
 const paragraphStore = () => {
-  const [store, setStore] = createStore<Paragraph[]>(initialParagraphs);
+  const paragraphs = new Paragraphs(initialParagraphs)
 
-  const paragraph_getters = (key: string) => {
-    return getterMethods(key, JSON.parse(JSON.stringify(store)))
-  }
-
-  const paragraph_mutations = (key: string) => {
-    return mutationMethods(key, setStore)
-  }
-
-  return {paragraph_getters, paragraph_mutations}
+  return { paragraphs }
 }
 
 export default createRoot(paragraphStore)

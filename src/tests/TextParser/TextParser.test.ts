@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { Parser } from '../../Editor/Libraries/TextParser';
+import { Parser } from '../../Editor/Utils/TextParser';
 import { emphasis, normal, url } from './TestData';
 
 describe('Text Parse Normal', () => {

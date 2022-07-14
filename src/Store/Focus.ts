@@ -7,4 +7,12 @@ export default class Focus {
   constructor(){
     [this.focusingBlockId, this.setFocusingBlockId] = createSignal('none');
   }
+
+  now = () => {
+    return this.focusingBlockId()
+  }
+
+  set = (id: string) => {
+    this.setFocusingBlockId(id)
+  }
 }

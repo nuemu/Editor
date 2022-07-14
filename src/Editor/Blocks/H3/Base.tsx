@@ -1,5 +1,5 @@
 import { Component } from "solid-js"
-import TextBase from "../Text/TextBase"
+import TextBase from "../Text/Base"
 
 const H3: Component<BlockBaseProps> = (props: BlockBaseProps) => {
   

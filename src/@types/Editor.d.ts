@@ -18,13 +18,15 @@ type BlockBaseProps = {
 type TextBlockProps = {
   node: nodeTree,
   caret: number,
-  visible?: any,
-  focus?: boolean
+  caret_on?: boolean,
+  focusing: boolean
 }
 
 type nodeTree = {
   type: string
   content: string
+  start?: number,
+  end?: number,
   ref?: HTMLSpanElement | HTMLDivElement | undefined
   children: nodeTree[]
 }
