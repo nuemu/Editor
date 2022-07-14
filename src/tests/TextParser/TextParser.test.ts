@@ -1,18 +1,18 @@
 import { describe, expect, it } from 'vitest'
 
-import { Lexer } from '../../Libraries/TextParser';
+import { Parser } from '../../Editor/Libraries/TextParser';
 import { emphasis, normal, url } from './TestData';
 
 describe('Text Parse Normal', () => {
   it('normal text parse test', () => {
-    expect(Lexer(normal.root)).toEqual(normal.tree);
+    expect(Parser(normal.root)).toEqual(normal.tree);
   });
 
   it('emphasis parse test', () => {
-    expect(Lexer(emphasis.root)).toEqual(emphasis.tree);
+    expect(Parser(emphasis.root)).toEqual(emphasis.tree);
   });
 
   it('url parse test', () => {
-    expect(Lexer(url.root)).toEqual(url.tree);
+    expect(Parser(url.root)).toEqual(url.tree);
   }); 
 });

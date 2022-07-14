@@ -1,24 +1,36 @@
-type Branch = {
+type SyntaxTree = {
+  category?: string,
   type: string,
   content: string,
   additional_content?: string,
   start_sign?: string,
   middle_sign?: string,
   end_sign?: string
-  ref? : HTMLSpanElement|undefined
-  children: Branch[]
+  children: SyntaxTree[]
 }
 
-// caret ~ visible Accessor<T> not working ?
 type BlockBaseProps = {
   id: string,
   paragraph_id: string
 }
 
+/* TextBlock types */
 type TextBlockProps = {
-  branch: Branch,
-  caret: any,
-  lengthTree: any,
-  visible: any,
-  focus: boolean
+  node: nodeTree,
+  caret: number,
+  visible?: any,
+  focus?: boolean
 }
+
+type nodeTree = {
+  type: string
+  content: string
+  ref?: HTMLSpanElement | HTMLDivElement | undefined
+  children: nodeTree[]
+}
+
+type text_styles = {
+  [key: string]: any
+}
+
+/* Block types */

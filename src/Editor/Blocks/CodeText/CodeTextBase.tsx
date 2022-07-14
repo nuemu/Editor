@@ -1,7 +1,7 @@
 import { Component, createSignal, createMemo, onMount, Show, createEffect, untrack, For } from 'solid-js';
 import { Dynamic } from "solid-js/web"
 import { ulid } from 'ulid';
-import { Parser } from '../../../Libraries/TextParser';
+import { Parser } from '../../Libraries/TextParser';
 
 const components = import.meta.globEager('./Components/*.tsx')
 

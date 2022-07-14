@@ -12,7 +12,7 @@ export default class Caret {
     return this.caretOffset()
   }
   
-  preserveCaretOffset = (refs: HTMLSpanElement[], diff?: number) => {
+  preserveOffset = (refs: HTMLSpanElement[], diff?: number) => {
     const caretPosition = diff ? this.getCaretPosition(refs) + diff : this.getCaretPosition(refs)
     this.setCaretOffset(caretPosition)
   }
@@ -68,7 +68,7 @@ export default class Caret {
     return caretPosition
   }
 
-  setCaretPosition = (innerText: string, refs: HTMLSpanElement[]) => {
+  setPosition = (innerText: string, refs: HTMLSpanElement[]) => {
     const selection = window.getSelection()
     const range = document.createRange()
     if(this.getNodeCaretOn(innerText, refs)){

@@ -68,7 +68,7 @@ const head_signs: head_signs = {
 }
 
 const generateChildren = (sentence: string, signs?:{start?: string, middle?: string, end?: string}) => {
-  var children: Branch[] = []
+  var children: SyntaxTree[] = []
   var regSign = ''
   var regStartPosition: number = sentence.length
 
@@ -88,7 +88,7 @@ const generateChildren = (sentence: string, signs?:{start?: string, middle?: str
     const split = sentence.split(reg)
     split.shift()
 
-    const newChild: Branch = {
+    const newChild: SyntaxTree = {
       type: inline_signs[regSign].type,
       content: split[1],
       start_sign: inline_signs[regSign].start_sign,
@@ -118,8 +118,8 @@ const generateChildren = (sentence: string, signs?:{start?: string, middle?: str
   return children
 }
 
-export const Parser = (branch: Branch) => {
-  var children: Branch[] = []
+export const Parser = (branch: SyntaxTree) => {
+  var children: SyntaxTree[] = []
 
   if(branch.type === 'root'){
     children = headParser(branch)
@@ -137,8 +137,8 @@ export const Parser = (branch: Branch) => {
   return branch
 }
 
-const headParser = (branch: Branch) => {
-  var children: Branch[] = []
+const headParser = (branch: SyntaxTree) => {
+  var children: SyntaxTree[] = []
   
   Object.keys(head_signs).forEach(key => {
     const reg = new RegExp('^'+key)
