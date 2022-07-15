@@ -20,10 +20,10 @@ export default class Focus {
   }
 
   next = () => {
-    this.set(paragraphs.next_block(this.focusingBlockId()))
+    if(paragraphs.next_block(this.focusingBlockId())) this.set(paragraphs.next_block(this.focusingBlockId()))
   }
 
   prev = () => {
-    this.set(paragraphs.prev_block(this.focusingBlockId()))
+    if(paragraphs.prev_block(this.focusingBlockId())) this.set(paragraphs.prev_block(this.focusingBlockId()))
   }
 }

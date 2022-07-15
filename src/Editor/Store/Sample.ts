@@ -36,7 +36,7 @@ export const BlocksSample = [
           "type": "Text"
       },
       "data": {
-        "text": "ディスプレイ要素？として、h1~h3は実装。これはCodeブロックだが、Syntax Highlightはまだ準備されてない。"
+        "text": "console.log('ディスプレイ要素？として、h1~h3は実装。') //これはCodeブロック。調整中"
       }
   },
   {

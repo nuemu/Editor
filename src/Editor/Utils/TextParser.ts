@@ -61,7 +61,7 @@ const head_signs: head_signs = {
     sign: '# '
   },
   '```': {
-    reg: '```(.+)',
+    reg: '```.*',
     type: 'Code',
     sign: '```'
   }
@@ -108,7 +108,7 @@ const generateChildren = (sentence: string, signs?:{start?: string, middle?: str
       if(split[3] !== '') children = children.concat(generateChildren(split[3]))
     }
   }
-  else children.push({type: 'text', content: sentence, children: []})
+  else if(sentence !== '') children.push({type: 'text', content: sentence, children: []})
 
   if(signs){
     children.splice(0, 0, {type: 'sign', content: signs.start!, children: []})

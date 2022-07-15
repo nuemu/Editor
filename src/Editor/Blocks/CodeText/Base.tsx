@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, createSignal, onMount, untrack, For } from 'solid-js';
+import { Component, createEffect, createMemo, untrack, For } from 'solid-js';
 
 import Store from '../../Store/Store'
 import Systems from '../../Store/Systems'
@@ -25,20 +25,27 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
   const block = createMemo(() => blocks.get(props.id)!)
   const { caret, focus } = Systems
 
-  const nodes = new Nodes(block().data.text, 'js')
+  const code = createMemo(() => 'js')
+
+  const node = new Nodes(block().data.text, code())
+
+  // Wait for Very slow Async highlighter initialization ...
+  createEffect(() => {
+    if(!highlighter.loading) untrack(() => node.set(code()))
+  })
 
   let ref: HTMLDivElement|undefined
   
   /******************** handle Something Methods ********************/
   
   const handleInput = () => {
-    caret.preserveOffset(nodes.refs() as HTMLSpanElement[])
-    nodes.set('js')
-    caret.setPosition(nodes.innerText(), nodes.refs()as HTMLSpanElement[])
+    caret.preserveOffset(node.refs() as HTMLSpanElement[])
+    node.set(code())
+    caret.setPosition(node.innerText(), node.refs()as HTMLSpanElement[])
 
-    if(nodes.innerText().length === 0){
+    if(node.innerText().length === 0){
       caret.force(1)
-      nodes.set('js', ref!.innerText)
+      node.set(code(), ref!.innerText)
       Array.from(ref!.childNodes).forEach(node => {
         if(node.nodeName === '#text') ref!.removeChild(node)
         if(node.nodeName === 'BR') ref!.removeChild(node)
@@ -48,15 +55,15 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
 
   createEffect(() => {
     if(focus.now() === props.id){
-      caret.setPosition(nodes.innerText(), nodes.refs() as HTMLSpanElement[])
+      caret.setPosition(node.innerText(), node.refs() as HTMLSpanElement[])
     }
   })
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if(e.key === 'Enter'){
       e.preventDefault()
-      const text = nodes.innerText().substring(0, caret.offset())
-      const text_next = nodes.innerText().substring(caret.offset())
+      const text = node.innerText().substring(0, caret.offset())
+      const text_next = node.innerText().substring(caret.offset())
       blocks.update_data(props.id, {text: text})
       const id = ulid()
       blocks.add(id, 'Text', text_next)
@@ -66,36 +73,41 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
     }
 
     if(e.key === 'Backspace'){
-      if(nodes.innerText().length === 0){
-        console.log("remove")
+      if(caret.offset() === 0){
+        e.preventDefault()
+        const prevId = paragraphs.prev_block(props.id)
+        blocks.update_data(prevId, {text: blocks.get(prevId)?.data.text+node.innerText()})
+        caret.force(blocks.get(prevId)?.data.text.length)
+        focus.prev()
+        paragraphs.removeBlock(props.paragraph_id, props.id)
       }
     }
         
     if(e.key === 'ArrowLeft'){
       e.preventDefault()
-      if(caret.offset() > 0) caret.preserveOffset(nodes.refs() as HTMLSpanElement[], -1)
+      if(caret.offset() > 0) caret.preserveOffset(node.refs() as HTMLSpanElement[], -1)
     }
 
     if(e.key === 'ArrowRight'){
       e.preventDefault()
-      if(caret.offset() < nodes.innerText().length) caret.preserveOffset(nodes.refs() as HTMLSpanElement[], 1)
+      if(caret.offset() < node.innerText().length) caret.preserveOffset(node.refs() as HTMLSpanElement[], 1)
     }
 
     if(e.key === 'ArrowUp'){
       e.preventDefault()
-      caret.preserveOffset(nodes.refs() as HTMLSpanElement[])
+      caret.preserveOffset(node.refs() as HTMLSpanElement[])
       focus.prev()
     }
 
     if(e.key === 'ArrowDown'){
       e.preventDefault()
-      caret.preserveOffset(nodes.refs() as HTMLSpanElement[])
+      caret.preserveOffset(node.refs() as HTMLSpanElement[])
       focus.next()
     }
   }
 
   const handleClick = () => {
-    caret.preserveOffset(nodes.refs() as HTMLSpanElement[])
+    caret.preserveOffset(node.refs() as HTMLSpanElement[])
     focus.set(props.id)
   }
   
@@ -104,12 +116,12 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
       contentEditable
       ref={ref}
       class="code-block-textarea"
-      style={Object.assign(style.textarea, {'background-color': nodes.list().color})}
+      style={Object.assign(style.textarea, {'background-color': node.list().color})}
       onInput={() => handleInput()}
       onKeyDown={(e) => handleKeyDown(e)}
       onClick={() => handleClick()}
     >
-      <For each={nodes.list().children}>{node => <span ref={node.ref} style={{'color': node.color}}>{node.content}</span>}</For>
+      <For each={node.list().children}>{node => <span ref={node.ref} style={{'color': node.color}}>{node.content}</span>}</For>
     </div>
   )
 }

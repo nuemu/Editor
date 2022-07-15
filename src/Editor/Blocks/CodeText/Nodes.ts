@@ -32,13 +32,16 @@ export default class Nodes{
   }
 
   private parser = (code: string, lang: string) => {
-    const html = document.createElement('span')
-    html.innerHTML = highlighter.parse(code, lang)
-    if(html.getElementsByClassName('line').length > 0){
-      const nodes = Array.from(html.getElementsByClassName('line').item(0)!.children) as HTMLSpanElement[]
-      var children = nodes.map(node => {return {color: node.style.color, content: node.innerText, ref: undefined}})
-      const node = {color: html.getElementsByTagName('pre')[0].style.backgroundColor, children: children.length !==0 ? children : [{color: '000000', content: code, ref: undefined}]}
-      return node
+    if(!highlighter.loading){
+      const html = document.createElement('span')
+      html.innerHTML = highlighter()!.parse(code, lang)
+      if(html.getElementsByClassName('line').length > 0){
+        const nodes = Array.from(html.getElementsByClassName('line').item(0)!.children) as HTMLSpanElement[]
+        var children = nodes.map(node => {return {color: node.style.color, content: node.innerText, ref: undefined}})
+        const node = {color: html.getElementsByTagName('pre')[0].style.backgroundColor, children: children.length !==0 ? children : [{color: '000000', content: code, ref: undefined}]}
+        return node
+      }
+      else return {color: '000000', children: [{color: '000000', content: code, ref: undefined}]}
     }
     else return {color: '000000', children: [{color: '000000', content: code, ref: undefined}]}
   }

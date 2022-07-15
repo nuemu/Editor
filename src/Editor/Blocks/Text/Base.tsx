@@ -47,8 +47,17 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
 
   createEffect(() => {
     if(focus.now() === props.id){
+      if(caret.offset() > node.innerText().length) caret.force(node.innerText().length)
       caret.setPosition(node.innerText(), node.list() as HTMLSpanElement[])
     }
+  })
+
+  createEffect(() => {
+    node.tree()
+    Array.from(ref!.childNodes).forEach(node => {
+      if(node.nodeName === '#text') ref!.removeChild(node)
+      if(node.nodeName === 'BR') ref!.removeChild(node)
+    })
   })
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -65,11 +74,16 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
     }
 
     if(e.key === 'Backspace'){
-      if(node.innerText().length === 0){
-        console.log("remove")
+      if(caret.offset() === 0){
+        e.preventDefault()
+        const prevId = paragraphs.prev_block(props.id)
+        blocks.update_data(prevId, {text: blocks.get(prevId)?.data.text+node.innerText()})
+        caret.force(blocks.get(prevId)?.data.text.length)
+        focus.prev()
+        paragraphs.removeBlock(props.paragraph_id, props.id)
       }
     }
-        
+    
     if(e.key === 'ArrowLeft'){
       e.preventDefault()
       if(caret.offset() > 0) caret.preserveOffset(node.list() as HTMLSpanElement[], -1)
