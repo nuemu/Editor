@@ -19,11 +19,11 @@ export default class Focus {
     this.setFocusingBlockId(id)
   }
 
-  next = (block_id: string) => {
-    this.set(paragraphs.next_block(block_id))
+  next = () => {
+    this.set(paragraphs.next_block(this.focusingBlockId()))
   }
 
-  prev = (block_id: string) => {
-    this.set(paragraphs.prev_block(block_id))
+  prev = () => {
+    this.set(paragraphs.prev_block(this.focusingBlockId()))
   }
 }

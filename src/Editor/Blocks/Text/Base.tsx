@@ -5,6 +5,7 @@ import Store from '../../Store/Store';
 import Nodes from './Nodes'
 import Systems from '../../Store/Systems'
 import Separator from './Separator';
+import { ulid } from 'ulid';
 
 const style: text_styles = {
   base:{
@@ -25,12 +26,23 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
   const node = new Nodes(block().data.text)
   const { caret, focus } = Systems
 
+  let ref: HTMLDivElement|undefined
+
   /******************** handle Something Methods ********************/
 
   const handleInput = () => {
     caret.preserveOffset(node.list() as HTMLSpanElement[])
     node.set() // Update
     caret.setPosition(node.innerText(), node.list() as HTMLSpanElement[])
+
+    if(node.innerText().length === 0){
+      caret.force(1)
+      node.set(ref!.innerText)
+      Array.from(ref!.childNodes).forEach(node => {
+        if(node.nodeName === '#text') ref!.removeChild(node)
+        if(node.nodeName === 'BR') ref!.removeChild(node)
+      })
+    }
   }
 
   createEffect(() => {
@@ -43,12 +55,18 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
     if(e.key === 'Enter'){
       e.preventDefault()
       const text = node.innerText().substring(0, caret.offset())
-      const next = node.innerText().substring(caret.offset())
+      const text_next = node.innerText().substring(caret.offset())
+      blocks.update_data(props.id, {text: text})
+      const id = ulid()
+      blocks.add(id, 'Text', text_next)
+      paragraphs.addBlock(props.paragraph_id, props.id, id)
+      caret.force(0)
+      focus.next()
     }
 
     if(e.key === 'Backspace'){
-      if(node.innerText().length <= 1){
-        e.preventDefault()
+      if(node.innerText().length === 0){
+        console.log("remove")
       }
     }
         
@@ -65,13 +83,13 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
     if(e.key === 'ArrowUp'){
       e.preventDefault()
       caret.preserveOffset(node.list() as HTMLSpanElement[])
-      focus.prev(props.id)
+      focus.prev()
     }
 
     if(e.key === 'ArrowDown'){
       e.preventDefault()
       caret.preserveOffset(node.list() as HTMLSpanElement[])
-      focus.next(props.id)
+      focus.next()
     }
   }
 
@@ -83,6 +101,7 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
   return (
     <div
       contentEditable
+      ref={ref}
       class="text-block-textarea"
       style={style.textarea}
       onInput={() => handleInput()}

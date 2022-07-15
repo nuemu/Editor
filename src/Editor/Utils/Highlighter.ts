@@ -1,4 +1,5 @@
 import * as shiki from 'shiki'
+import { createResource, createRoot, createSignal } from 'solid-js'
 
 class Highlighter {
   private highlighter: shiki.Highlighter
@@ -19,4 +20,4 @@ class Highlighter {
 
 const highlighter = await Highlighter.build('nord')
 
-export default highlighter
+export default createRoot(() => highlighter)

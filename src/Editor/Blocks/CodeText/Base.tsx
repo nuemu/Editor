@@ -1,10 +1,11 @@
 import { Component, createEffect, createMemo, createSignal, onMount, untrack, For } from 'solid-js';
 
 import Store from '../../Store/Store'
-
 import Systems from '../../Store/Systems'
-import Nodes from './Nodes'
 
+import Nodes from './Nodes'
+import highlighter from '../../Utils/Highlighter'
+import { ulid } from 'ulid';
 
 const style: text_styles = {
   base:{
@@ -22,12 +23,11 @@ const style: text_styles = {
 const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
   const { blocks, paragraphs } = Store
   const block = createMemo(() => blocks.get(props.id)!)
-  const [innerText, setInnerText] = createSignal(block().data.text)
   const { caret, focus } = Systems
 
-  const nodes = new Nodes(innerText(), 'js')
+  const nodes = new Nodes(block().data.text, 'js')
 
-  let baseRef: HTMLSpanElement|undefined
+  let ref: HTMLDivElement|undefined
   
   /******************** handle Something Methods ********************/
   
@@ -35,6 +35,15 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
     caret.preserveOffset(nodes.refs() as HTMLSpanElement[])
     nodes.set('js')
     caret.setPosition(nodes.innerText(), nodes.refs()as HTMLSpanElement[])
+
+    if(nodes.innerText().length === 0){
+      caret.force(1)
+      nodes.set('js', ref!.innerText)
+      Array.from(ref!.childNodes).forEach(node => {
+        if(node.nodeName === '#text') ref!.removeChild(node)
+        if(node.nodeName === 'BR') ref!.removeChild(node)
+      })
+    }
   }
 
   createEffect(() => {
@@ -45,9 +54,21 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if(e.key === 'Enter'){
+      e.preventDefault()
+      const text = nodes.innerText().substring(0, caret.offset())
+      const text_next = nodes.innerText().substring(caret.offset())
+      blocks.update_data(props.id, {text: text})
+      const id = ulid()
+      blocks.add(id, 'Text', text_next)
+      paragraphs.addBlock(props.paragraph_id, props.id, id)
+      caret.force(0)
+      focus.next()
     }
 
     if(e.key === 'Backspace'){
+      if(nodes.innerText().length === 0){
+        console.log("remove")
+      }
     }
         
     if(e.key === 'ArrowLeft'){
@@ -63,13 +84,13 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
     if(e.key === 'ArrowUp'){
       e.preventDefault()
       caret.preserveOffset(nodes.refs() as HTMLSpanElement[])
-      focus.prev(props.id)
+      focus.prev()
     }
 
     if(e.key === 'ArrowDown'){
       e.preventDefault()
       caret.preserveOffset(nodes.refs() as HTMLSpanElement[])
-      focus.next(props.id)
+      focus.next()
     }
   }
 
@@ -81,13 +102,14 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
   return (
     <div
       contentEditable
+      ref={ref}
       class="code-block-textarea"
-      style={style.textarea}
+      style={Object.assign(style.textarea, {'background-color': nodes.list().color})}
       onInput={() => handleInput()}
       onKeyDown={(e) => handleKeyDown(e)}
       onClick={() => handleClick()}
     >
-      <For each={nodes.list().children}>{node => <span ref={node.ref} style={{'color': node.color, 'background-color': nodes.list().color}}>{node.content}</span>}</For>
+      <For each={nodes.list().children}>{node => <span ref={node.ref} style={{'color': node.color}}>{node.content}</span>}</For>
     </div>
   )
 }

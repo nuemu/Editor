@@ -11,6 +11,10 @@ export default class Caret {
   offset = () => {
     return this.caretOffset()
   }
+
+  force = (offset: number) => {
+    this.setCaretOffset(offset)
+  }
   
   preserveOffset = (refs: HTMLSpanElement[], diff?: number) => {
     const caretPosition = diff ? this.getCaretPosition(refs) + diff : this.getCaretPosition(refs)
