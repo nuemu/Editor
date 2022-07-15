@@ -5,7 +5,7 @@ import katex from 'katex'
 import 'katex/dist/katex.css'
 
 const styles: text_styles = {
-  emphasis: {
+  strong: {
     'font-weight': 'bolder',
     outline: 'none'
   },
@@ -26,7 +26,6 @@ const Decorator: Component<TextBlockProps> = (props: TextBlockProps) => {
   }
 
   const switch_style = () => {
-    console.log(props.node.additional_content)
     return !caret_inside() && (props.node.type === 'equation' || props.node.type === 'url') ?  'invisible' : props.node.type
   }
 

@@ -19,7 +19,7 @@ type head_signs = {
 const inline_signs: inline_signs = {
   '**': {
     reg: '\\*{2,2}(.+?)\\*{2,2}',
-    type: 'emphasis',
+    type: 'strong',
     start_sign: '**',
     end_sign: '**',
   },

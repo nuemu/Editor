@@ -1,4 +1,7 @@
 import { Accessor, Setter, createSignal } from "solid-js"
+import Store from './Store'
+
+const { paragraphs } = Store
 
 export default class Focus {
   private focusingBlockId: Accessor<string>
@@ -14,5 +17,13 @@ export default class Focus {
 
   set = (id: string) => {
     this.setFocusingBlockId(id)
+  }
+
+  next = (block_id: string) => {
+    this.set(paragraphs.next_block(block_id))
+  }
+
+  prev = (block_id: string) => {
+    this.set(paragraphs.prev_block(block_id))
   }
 }

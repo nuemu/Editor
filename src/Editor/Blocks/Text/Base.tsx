@@ -1,10 +1,9 @@
 import { Component, createEffect, createMemo, onMount, untrack } from 'solid-js';
 
-import BlocksStore from '../../../Store/Blocks'
-import Paragraphs from '../../../Store/Paragraphs';
+import Store from '../../Store/Store';
 
 import Nodes from './Nodes'
-import Systems from '../../../Store/Systems'
+import Systems from '../../Store/Systems'
 import Separator from './Separator';
 
 const style: text_styles = {
@@ -21,9 +20,8 @@ const style: text_styles = {
 }
 
 const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
-  const { block_getters } = BlocksStore
-  const { paragraphs } = Paragraphs
-  const block = createMemo(() => block_getters('get')(props.id))
+  const { blocks, paragraphs } = Store
+  const block = createMemo(() => blocks.get(props.id)!)
   const node = new Nodes(block().data.text)
   const { caret, focus } = Systems
 
@@ -43,9 +41,15 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if(e.key === 'Enter'){
+      e.preventDefault()
+      const text = node.innerText().substring(0, caret.offset())
+      const next = node.innerText().substring(caret.offset())
     }
 
     if(e.key === 'Backspace'){
+      if(node.innerText().length <= 1){
+        e.preventDefault()
+      }
     }
         
     if(e.key === 'ArrowLeft'){
@@ -61,13 +65,13 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
     if(e.key === 'ArrowUp'){
       e.preventDefault()
       caret.preserveOffset(node.list() as HTMLSpanElement[])
-      focus.set(paragraphs.prev(props.paragraph_id, props.id))
+      focus.prev(props.id)
     }
 
     if(e.key === 'ArrowDown'){
       e.preventDefault()
       caret.preserveOffset(node.list() as HTMLSpanElement[])
-      focus.set(paragraphs.next(props.paragraph_id, props.id))
+      focus.next(props.id)
     }
   }
 

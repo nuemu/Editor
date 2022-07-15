@@ -1,7 +1,7 @@
 import { Component, createEffect, createSignal } from "solid-js"
 
 import Text from "../Text/Base"
-import Systems from '../../../Store/System'
+import Systems from '../../Store/Systems'
 
 const style = {
   visible: {
@@ -15,11 +15,11 @@ const style = {
 }
 
 const Code: Component<BlockBaseProps> = (props: BlockBaseProps) => {
-  const { system_getters } = Systems
+  const { focus } = Systems
   const [view, setView] = createSignal(style.visible)
 
   createEffect(() => {
-    if(system_getters('focus')() === props.id) setView(style.visible)
+    if(focus.now() === props.id) setView(style.visible)
     else setView(style.invisible)
   })
   
