@@ -46,7 +46,8 @@ export default class Node {
       var newStart = start ? start : 0
       tree.children = branch.children.map((child, index) => {
         newStart += (index > 0 ? nodeLength(branch.children[index-1]) : 0)
-        return this.generateTree(child, newStart, {type: child.type, content: child.content, children: []})
+        if(Object.keys(child).includes('additional_content')) return this.generateTree(child, newStart, {type: child.type, content: child.content, additional_content: child.additional_content, children: []})
+        else return this.generateTree(child, newStart, {type: child.type, content: child.content, children: []})
       })
     }
 

@@ -25,8 +25,9 @@ type TextBlockProps = {
 type nodeTree = {
   type: string
   content: string
-  start?: number,
-  end?: number,
+  additional_content?: string
+  start?: number
+  end?: number
   ref?: HTMLSpanElement | HTMLDivElement | undefined
   children: nodeTree[]
 }

@@ -26,6 +26,7 @@ const Decorator: Component<TextBlockProps> = (props: TextBlockProps) => {
   }
 
   const switch_style = () => {
+    console.log(props.node.additional_content)
     return !caret_inside() && (props.node.type === 'equation' || props.node.type === 'url') ?  'invisible' : props.node.type
   }
 
@@ -43,7 +44,7 @@ const Decorator: Component<TextBlockProps> = (props: TextBlockProps) => {
       <Show when={!caret_inside() && props.node.type==='url'}>
         <a
           contentEditable={false}
-          href="/Editor"
+          href={props.node.additional_content}
         >
           <Separator node={props.node} caret={props.caret} focusing={props.focusing} caret_on={caret_inside()} />
         </a>
