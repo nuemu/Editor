@@ -1,9 +1,11 @@
-import { Component, createEffect, createSignal, untrack } from 'solid-js';
+import { Component, createEffect, createSignal, splitProps, untrack } from 'solid-js';
 
 import Store from '../../Store/Store';
 import Systems from '../../Store/Systems'
 
 import { ulid } from 'ulid';
+
+import * as Components from './TextComponent';
 
 const style: text_styles = {
   base:{
@@ -20,7 +22,8 @@ const style: text_styles = {
 
 type TextBaseProps = BlockBaseProps & {
   node: any
-  component: Component<any>
+  component: string
+  style?: {[key: string]: string}
 }
 
 const Base: Component<TextBaseProps> = (props: TextBaseProps) => {
@@ -30,7 +33,9 @@ const Base: Component<TextBaseProps> = (props: TextBaseProps) => {
 
   const [cleanup, setCleanup] = createSignal(false)
 
-  const IndivisualTextComponent = props.component
+  const [additional] = splitProps(props, ['style'])
+
+  const IndivisualTextComponent = (Components as {[key: string]: any})[props.component]
 
   let ref: HTMLDivElement|undefined
 
@@ -131,7 +136,7 @@ const Base: Component<TextBaseProps> = (props: TextBaseProps) => {
       contentEditable
       ref={ref}
       class="textarea-base"
-      style={style.textarea}
+      style={props.style ? props.style : style.textarea}
       onInput={() => handleInput()}
       onKeyDown={(e) => handleKeyDown(e)}
       onClick={() => handleClick()}

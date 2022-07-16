@@ -33,56 +33,14 @@ const Paragraph: Component = () => {
         codetexts = []
       }
     })
-    
-    var collections: {id: string, type: string}[][] = []
-    var codetexts: {id: string, type: string}[] = []
-    var normals: {id: string, type: string}[] = []
-    block_types.forEach((block: {id: string, type: string}) => {
-      if(block.type === 'CodeText'){
-        codetexts.push(block)
-        if(normals.length > 0){
-          collections.push(normals)
-          normals = []
-        }
-      }
-      else{
-        normals.push(block)
-        if(codetexts.length > 0){
-          collections.push(codetexts)
-          codetexts = []
-        }
-      }
-    })
 
-    if(normals.length > 0){
-      collections.push(normals)
-      normals = []
-    }
-
-    return collections
+    return block_types
   })
 
   return (
     <For each={types()}>
-      {(blocks_in_paragraph: {id: string, type: string}[]) =>
-        <Switch>
-          <Match when={blocks_in_paragraph[0].type !== 'CodeText'}>
-            <For each={blocks_in_paragraph}>
-              {(block: {id: string, type: string}) => 
-                <Dynamic component={Blocks['./Blocks/'+block.type+'/Base.tsx'].default} id={block.id} paragraph_id={"01G5KAR1FY949SY0R2DV4RGR7M"}/>
-              }
-            </For>
-          </Match>
-          <Match when={blocks_in_paragraph[0].type === 'CodeText'}>
-            <pre><code>
-            <For each={blocks_in_paragraph}>
-              {(block: {id: string, type: string}) => 
-                <Dynamic component={Blocks['./Blocks/'+block.type+'/Base.tsx'].default} id={block.id} paragraph_id={"01G5KAR1FY949SY0R2DV4RGR7M"}/>
-              }
-            </For>
-            </code></pre>
-          </Match>
-        </Switch>
+      {(block: {id: string, type: string}) =>
+        <Dynamic component={Blocks['./Blocks/'+block.type+'/Base.tsx'].default} id={block.id} paragraph_id={"01G5KAR1FY949SY0R2DV4RGR7M"}/>
       }
     </For>
   )
