@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, mergeProps } from 'solid-js';
+import { Component, createEffect, createSignal, untrack } from 'solid-js';
 
 import Store from '../../Store/Store';
 import Systems from '../../Store/Systems'
@@ -28,9 +28,37 @@ const Base: Component<TextBaseProps> = (props: TextBaseProps) => {
   const node = props.node
   const { caret, focus } = Systems
 
+  const [cleanup, setCleanup] = createSignal(false)
+
   const IndivisualTextComponent = props.component
 
   let ref: HTMLDivElement|undefined
+
+  // After Focus
+  createEffect(() => {
+    if(focus.now() === props.id){
+      untrack(() => {
+        if(caret.offset() > node.innerText().length) caret.force(node.innerText().length)
+        caret.setPosition(node.innerText(), node.refs() as HTMLSpanElement[])
+      })
+    }
+  })
+
+  // Caret Move
+  createEffect(() => {
+    caret.offset()
+    if(untrack(() => focus.now() === props.id)) caret.setPosition(node.innerText(), node.refs() as HTMLSpanElement[])
+  })
+
+  createEffect(() => {
+    if(cleanup()){
+      Array.from(ref!.childNodes).forEach(node => {
+        if(node.nodeName === '#text') ref!.removeChild(node)
+        if(node.nodeName === 'BR') ref!.removeChild(node)
+      })
+      setCleanup(false)
+    }
+  })
 
   /******************** handle Something Methods ********************/
 
@@ -40,29 +68,11 @@ const Base: Component<TextBaseProps> = (props: TextBaseProps) => {
     caret.setPosition(node.innerText(), node.refs() as HTMLSpanElement[])
 
     if(node.innerText().length === 0){
-      caret.force(1)
       node.set(ref!.innerText)
-      Array.from(ref!.childNodes).forEach(node => {
-        if(node.nodeName === '#text') ref!.removeChild(node)
-        if(node.nodeName === 'BR') ref!.removeChild(node)
-      })
+      caret.force(1)
+      setCleanup(true)
     }
   }
-
-  createEffect(() => {
-    if(focus.now() === props.id){
-      if(caret.offset() > node.innerText().length) caret.force(node.innerText().length)
-      caret.setPosition(node.innerText(), node.refs() as HTMLSpanElement[])
-    }
-  })
-
-  createEffect(() => {
-    node.tree()
-    Array.from(ref!.childNodes).forEach(node => {
-      if(node.nodeName === '#text') ref!.removeChild(node)
-      if(node.nodeName === 'BR') ref!.removeChild(node)
-    })
-  })
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if(e.key === 'Enter'){

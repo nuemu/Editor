@@ -29,6 +29,8 @@ const Decorator: Component<TextBlockProps> = (props: TextBlockProps) => {
     return !caret_inside() && (props.node.type === 'equation' || props.node.type === 'url') ?  'invisible' : props.node.type
   }
 
+  const copyNode = JSON.parse(JSON.stringify(props.node))
+
   return (
     <>
       <Show when={!caret_inside() && props.node.type==='equation'}>
@@ -45,7 +47,7 @@ const Decorator: Component<TextBlockProps> = (props: TextBlockProps) => {
           contentEditable={false}
           href={props.node.additional_content}
         >
-          <Separator node={props.node} caret={props.caret} focusing={props.focusing} caret_on={caret_inside()} />
+          <Separator node={copyNode} caret={props.caret} focusing={props.focusing} caret_on={caret_inside()} />
         </a>
       </Show>
       <span style={styles[switch_style()]}>

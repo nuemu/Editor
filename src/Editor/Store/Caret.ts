@@ -88,13 +88,14 @@ export default class Caret {
     var textLength: number = 0
     var caretPosition: number = 0
 
-    refs.forEach(ref => {
+    for(const ref of refs){
       if(selection?.anchorNode?.parentElement === ref){
         // When delete only one letter, insert '\n' ... (Content Editable ?)
         caretPosition = textLength + (selection?.anchorNode?.nodeValue === '\n' ? 0 : selection?.anchorOffset || 0)
+        break
       }
       textLength += ref?.innerText.length || 0
-    })
+    }
 
     return caretPosition
   }
