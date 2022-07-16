@@ -34,7 +34,13 @@ export default class Node {
   }
 
   innerText = () => {
-    return this.refs()!.map(node => node?.innerText).join('')
+    
+    return  this.refs()!.map(node => node?.innerText).join('')
+  }
+
+  // node?.innerText is good for new lines (because childNodes.item(0) = null), But when testing it's not working (because it's not rendered ?)
+  innerTextforTesting = () => {
+    return this.refs()!.map(node => node?.childNodes.item(0).nodeValue).join('')
   }
 
   private generateTree = (branch: SyntaxTree, start: number = 0, tree: nodeTree = {type: 'root', content: 'root', children: []}) => {

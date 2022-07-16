@@ -28,12 +28,10 @@ describe('Text Parse Normal', () => {
     expect(nodes.refs()).toEqual(set.refs);
   });
 
-  /* Impossible, maybe there is no document ...
   it('innerText test', () => {
     const nodes = new Nodes(inner.text);
     render(() => TestComponent({node: nodes.tree()}));
 
-    expect(nodes.innerText()).toEqual(inner.text);
+    expect(nodes.innerTextforTesting()).toEqual(inner.text);
   });
-  */
 });
