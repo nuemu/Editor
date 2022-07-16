@@ -60,19 +60,19 @@ export const url = {
   }
 }
 
-export const emphasis = {
+export const strong = {
   root: {
     type: 'root',
-    content: '**emphasis** text',
+    content: '**strong** text',
     children: []
   },
   tree: {
     type: 'root',
-    content: '**emphasis** text',
+    content: '**strong** text',
     children: [
       {
-        type: 'emphasis',
-        content: 'emphasis',
+        type: 'strong',
+        content: 'strong',
         start_sign: '**',
         end_sign: '**',
         children: [
@@ -83,7 +83,7 @@ export const emphasis = {
           },
           {
             type: 'text',
-            content: 'emphasis',
+            content: 'strong',
             children: []
           },
           {
