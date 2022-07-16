@@ -1,4 +1,4 @@
-export const BlocksSample = [
+export const BlocksDevData = [
   {
       "id": "01G4FQHW27SQ4AYTNTQV1E7PND",
       "config": {
