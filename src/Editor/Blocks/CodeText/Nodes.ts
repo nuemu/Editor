@@ -8,19 +8,22 @@ type node = {
 }
 
 export default class Nodes{
-  node: Accessor<{color: string, children:node[]}>
-  setNode: Setter<{color: string, children:node[]}>
+  private node: Accessor<{color: string, children:node[]}>
+  private setNode: Setter<{color: string, children:node[]}>
+  private language: Accessor<string>
+  private setLanguage: Setter<string>
   constructor(code: string, lang: string){
-    [this.node, this.setNode] = createSignal(this.parser(code, lang))
+    [this.language, this.setLanguage] = createSignal(lang);
+    [this.node, this.setNode] = createSignal(this.parser(code));
   }
 
-  list = () => {
+  tree = () => {
     return this.node()
   }
 
-  set = (lang: string, code?: string) => {
-    if(code) this.setNode(this.parser(code, lang))
-    else this.setNode(this.parser(this.innerText(), lang))
+  set = (code?: string) => {
+    if(code) this.setNode(this.parser(code))
+    else this.setNode(this.parser(this.innerText()))
   }
 
   refs = () => {
@@ -31,10 +34,10 @@ export default class Nodes{
     return this.node().children.map(node => document.contains(node.ref!) ? node.ref!.innerText : '').join('')
   }
 
-  private parser = (code: string, lang: string) => {
+  private parser = (code: string) => {
     if(!highlighter.loading){
       const html = document.createElement('span')
-      html.innerHTML = highlighter()!.parse(code, lang)
+      html.innerHTML = highlighter()!.parse(code, this.language())
       if(html.getElementsByClassName('line').length > 0){
         const nodes = Array.from(html.getElementsByClassName('line').item(0)!.children) as HTMLSpanElement[]
         var children = nodes.map(node => {return {color: node.style.color, content: node.innerText, ref: undefined}})
