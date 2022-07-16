@@ -1,5 +1,9 @@
 import { Parser } from "../../Utils/TextParser"
 import { Accessor, children, createSignal, Setter } from "solid-js"
+import Store from '../../Store/Store'
+import Blocks from "Editor/Store/Blocks"
+
+const { blocks, paragraphs } = Store
 
 type lengthTree = {
   start: number,
@@ -22,6 +26,7 @@ export default class Node {
     if(!text) text = this.innerText()
     const branch = Parser({type: 'root', content: text, children: []})
     this.setnodeTree(this.generateTree(branch))
+    return branch.children[0].additional_content
   }
 
   refs = () => {

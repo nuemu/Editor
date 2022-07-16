@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, splitProps, untrack } from 'solid-js';
+import { Component, createEffect, createSignal, untrack } from 'solid-js';
 
 import Store from '../../Store/Store';
 import Systems from '../../Store/Systems'
@@ -32,8 +32,6 @@ const Base: Component<TextBaseProps> = (props: TextBaseProps) => {
   const { caret, focus } = Systems
 
   const [cleanup, setCleanup] = createSignal(false)
-
-  const [additional] = splitProps(props, ['style'])
 
   const IndivisualTextComponent = (Components as {[key: string]: any})[props.component]
 
@@ -69,7 +67,18 @@ const Base: Component<TextBaseProps> = (props: TextBaseProps) => {
 
   const handleInput = () => {
     caret.preserveOffset(node.refs() as HTMLSpanElement[])
-    node.set() // Update
+    blocks.update_data(props.id, {text: node.innerText()})
+    const type = node.set() // Update
+    if(type){
+      const newBlock = JSON.parse(JSON.stringify(blocks.get(props.id)))
+      newBlock!.config.type = type
+      blocks.update(props.id, newBlock)
+    }
+    else{
+      const newBlock = JSON.parse(JSON.stringify(blocks.get(props.id)))
+      newBlock!.config.type = 'Text'
+      blocks.update(props.id, newBlock)
+    }
     caret.setPosition(node.innerText(), node.refs() as HTMLSpanElement[])
 
     if(node.innerText().length === 0){
@@ -100,6 +109,13 @@ const Base: Component<TextBaseProps> = (props: TextBaseProps) => {
         caret.force(blocks.get(prevId)?.data.text.length)
         focus.prev()
         paragraphs.removeBlock(props.paragraph_id, props.id)
+      }
+      if(node.innerText()==='\n'){
+        e.preventDefault()
+        const prevId = paragraphs.prev_block(props.id)
+        caret.force(blocks.get(prevId)?.data.text.length)
+        paragraphs.removeBlock(props.paragraph_id, props.id)
+        focus.prev()
       }
     }
     
