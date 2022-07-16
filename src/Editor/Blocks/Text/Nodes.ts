@@ -24,12 +24,12 @@ export default class Node {
     this.setnodeTree(this.generateTree(branch))
   }
 
-  list = () => {
+  refs = () => {
     return this.generateRefList(this.nodeTree())
   }
 
   innerText = () => {
-    return this.list()!.map(node => node?.innerText).join('')
+    return this.refs()!.map(node => node?.innerText).join('')
   }
 
   private generateTree = (branch: SyntaxTree, start: number = 0, tree: nodeTree = {type: 'root', content: 'root', children: []}) => {
