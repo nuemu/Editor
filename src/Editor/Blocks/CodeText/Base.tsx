@@ -25,7 +25,7 @@ const Base: Component<BlockBaseProps> = (props: BlockBaseProps) => {
   })
   
   return (
-    <TextBase id={props.id} paragraph_id={props.paragraph_id} node={node} component={'Code'} style={{'background-color': node.tree().color, outline: 'none'}}/>
+    <TextBase id={props.id} paragraph_id={props.paragraph_id} node={node} component={'Code'} style={{'padding-left': '8pt', 'padding-right': '8pt', 'background-color': node.tree().color, outline: 'none'}}/>
   )
 }
 

@@ -61,16 +61,16 @@ const head_signs: head_signs = {
     sign: '# '
   },
   '```': {
-    reg: '```.*',
+    reg: '```',
     type: 'Code',
     sign: '```'
   }
 }
 
 const generateChildren = (sentence: string, signs?:{start?: string, middle?: string, end?: string}) => {
-  var children: SyntaxTree[] = []
-  var regSign = ''
-  var regStartPosition: number = sentence.length
+  let children: SyntaxTree[] = []
+  let regSign = ''
+  let regStartPosition: number = sentence.length
 
   // Check which sign hit first
   Object.keys(inline_signs).forEach(sign => {
@@ -119,7 +119,7 @@ const generateChildren = (sentence: string, signs?:{start?: string, middle?: str
 }
 
 export const Parser = (branch: SyntaxTree) => {
-  var children: SyntaxTree[] = []
+  let children: SyntaxTree[] = []
 
   if(branch.type === 'root'){
     children = headParser(branch)
@@ -138,12 +138,13 @@ export const Parser = (branch: SyntaxTree) => {
 }
 
 const headParser = (branch: SyntaxTree) => {
-  var children: SyntaxTree[] = []
+  const children: SyntaxTree[] = []
   
   Object.keys(head_signs).forEach(key => {
-    const reg = new RegExp('^'+key)
+    const reg = new RegExp('^'+head_signs[key].reg)
     if(reg.test(branch.content)){
       branch.content = branch.content.split(reg)[1]
+      console.log(reg, branch.content.split(reg))
       children.push({type: 'head_sign', content: head_signs[key].sign, additional_content: head_signs[key].type, children: []})
     }
   })
