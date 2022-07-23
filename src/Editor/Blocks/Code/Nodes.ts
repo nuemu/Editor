@@ -1,5 +1,4 @@
 import { createSignal, Accessor, Setter } from 'solid-js'
-import highlighter from '../../Utils/Highlighter'
 
 type node = {
   content: string

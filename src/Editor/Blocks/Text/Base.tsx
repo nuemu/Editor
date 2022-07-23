@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, onMount, untrack } from 'solid-js';
+import { Component, createMemo } from 'solid-js';
 
 import Store from '../../Store/Store';
 

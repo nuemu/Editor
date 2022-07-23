@@ -25,8 +25,8 @@ const Code: Component<BlockBaseProps> = (props: BlockBaseProps) => {
   const node = new Node(block().data.text)
 
   createEffect(() => {
-    if(focus.now() === props.id) setView(style.visible)
-    else setView(style.invisible)
+    //if(focus.now() === props.id) setView(style.visible)
+    //else setView(style.invisible)
   })
   
   return <div class="code-block-base" style={view()}><TextBase id={props.id} paragraph_id={props.paragraph_id} node={node} component={'Code'}/></div>

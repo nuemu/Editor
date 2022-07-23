@@ -11,7 +11,9 @@ type SyntaxTree = {
 
 type BlockBaseProps = {
   id: string,
-  paragraph_id: string
+  paragraph_id: string,
+  block_data?: any,
+  style?: any
 }
 
 /* TextBlock types */

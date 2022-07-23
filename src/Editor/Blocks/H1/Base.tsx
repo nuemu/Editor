@@ -8,7 +8,7 @@ const H1: Component<BlockBaseProps> = (props: BlockBaseProps) => {
       class="h1-block-base"
       style={{outline: 'none', "font-weight": "bolder", "font-size": "2rem"}}
     >
-      <TextBase id={props.id} paragraph_id={props.paragraph_id}/>
+      <TextBase id={props.id} paragraph_id={props.paragraph_id} block_data={props.block_data} style={props.style}/>
     </div>)
 }
 
